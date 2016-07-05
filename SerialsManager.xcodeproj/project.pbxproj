@@ -11,6 +11,7 @@
 		843072201D2A6F4300C08568 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* ViewController.swift */; };
 		843072221D2A6F4300C08568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843072211D2A6F4300C08568 /* Assets.xcassets */; };
 		843072251D2A6F4300C08568 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 843072231D2A6F4300C08568 /* Main.storyboard */; };
+		843072311D2BB19E00C08568 /* Serials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843072301D2BB19E00C08568 /* Serials.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -20,6 +21,7 @@
 		843072211D2A6F4300C08568 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		843072241D2A6F4300C08568 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		843072261D2A6F4300C08568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		843072301D2BB19E00C08568 /* Serials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serials.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -57,6 +59,7 @@
 				843072211D2A6F4300C08568 /* Assets.xcassets */,
 				843072231D2A6F4300C08568 /* Main.storyboard */,
 				843072261D2A6F4300C08568 /* Info.plist */,
+				843072301D2BB19E00C08568 /* Serials.swift */,
 			);
 			path = SerialsManager;
 			sourceTree = "<group>";
@@ -133,6 +136,7 @@
 			files = (
 				843072201D2A6F4300C08568 /* ViewController.swift in Sources */,
 				8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */,
+				843072311D2BB19E00C08568 /* Serials.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

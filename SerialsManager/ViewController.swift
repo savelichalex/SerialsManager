@@ -9,19 +9,28 @@
 import Cocoa
 
 class ViewController: NSViewController {
+    
+    let dbPath = NSURL.fileURLWithPath("/Users/admin/friends-db")
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        getSeasons()
         // Do any additional setup after loading the view.
     }
 
     override var representedObject: AnyObject? {
         didSet {
-        // Update the view, if already loaded.
+        // Update the view, if already l oaded.
         }
     }
-
+    
+    func getSeasons() {
+        let serials = getSerials(dbPath)
+        if serials != nil {
+            print(serials!.first!.seasons!.first!.chapters!.first!.title)
+        }
+    }
 
 }
 

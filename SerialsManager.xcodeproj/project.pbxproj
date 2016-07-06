@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721D1D2A6F4300C08568 /* AppDelegate.swift */; };
-		843072201D2A6F4300C08568 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* ViewController.swift */; };
+		843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* SerialsViewController.swift */; };
 		843072221D2A6F4300C08568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843072211D2A6F4300C08568 /* Assets.xcassets */; };
 		843072251D2A6F4300C08568 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 843072231D2A6F4300C08568 /* Main.storyboard */; };
 		843072311D2BB19E00C08568 /* Serials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843072301D2BB19E00C08568 /* Serials.swift */; };
@@ -17,7 +17,7 @@
 /* Begin PBXFileReference section */
 		8430721A1D2A6F4200C08568 /* SerialsManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SerialsManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8430721D1D2A6F4300C08568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8430721F1D2A6F4300C08568 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8430721F1D2A6F4300C08568 /* SerialsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialsViewController.swift; sourceTree = "<group>"; };
 		843072211D2A6F4300C08568 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		843072241D2A6F4300C08568 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		843072261D2A6F4300C08568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -55,7 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				8430721D1D2A6F4300C08568 /* AppDelegate.swift */,
-				8430721F1D2A6F4300C08568 /* ViewController.swift */,
+				8430721F1D2A6F4300C08568 /* SerialsViewController.swift */,
 				843072211D2A6F4300C08568 /* Assets.xcassets */,
 				843072231D2A6F4300C08568 /* Main.storyboard */,
 				843072261D2A6F4300C08568 /* Info.plist */,
@@ -134,7 +134,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				843072201D2A6F4300C08568 /* ViewController.swift in Sources */,
+				843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */,
 				8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */,
 				843072311D2BB19E00C08568 /* Serials.swift in Sources */,
 			);

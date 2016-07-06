@@ -8,7 +8,7 @@
 
 import Cocoa
 
-class ViewController: NSViewController {
+class SerialsViewController: NSViewController {
     
     let dbPath = NSURL.fileURLWithPath("/Users/admin/friends-db")
     
@@ -30,9 +30,10 @@ class ViewController: NSViewController {
 
 }
 
-extension ViewController: NSOutlineViewDataSource {
+extension SerialsViewController: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+        print("sdfsdf")
         if let i = item as? Serial {
             if i.seasons != nil {
                 return i.seasons!.count

@@ -8,27 +8,57 @@
 
 import Foundation
 
-struct Serial {
+struct SerialData {
     let path: NSURL
     let title: String
-    var seasons: [Season]?
     let seasonsJSON: NSURL
-    var active: Bool
 }
 
-struct Season {
+struct SeasonData {
     let path: NSURL
     let title: String
+    let chaptersJSON: NSURL
+}
+
+struct ChapterData {
+    let path: NSURL
+    let title: String
+}
+
+class Serial {
+    var data: SerialData
+    var seasons: [Season]?
+    var active: Bool
+    
+    init(data: SerialData) {
+        self.data = data
+        seasons = nil
+        active = false
+    }
+}
+
+class Season {
+    let data: SeasonData
     let serial: Serial?
     var chapters: [Chapter]?
-    let chaptersJSON: NSURL
     var active: Bool
+    
+    init(data: SeasonData, serial: Serial) {
+        self.data = data
+        self.serial = serial
+        chapters = nil
+        active = false
+    }
 }
 
-struct Chapter {
-    let path: NSURL
-    let title: String
+class Chapter {
+    let data: ChapterData
     let season: Season?
+    
+    init(data: ChapterData, season: Season) {
+        self.data = data
+        self.season = season
+    }
 }
 
 func getDirs(path: NSURL) -> [NSURL]? {
@@ -57,14 +87,12 @@ func getSerials(serialsPath: NSURL) -> [Serial]? {
     let dirs = getDirs(serialsPath)
     if dirs != nil {
         return dirs!.map{
-            var serial =
+            let serial =
                 Serial(
-                    path: $0,
-                    title: $0.lastPathComponent!,
-                    seasons: nil,
-                    seasonsJSON: NSURL.fileURLWithPath(($0.path! + "/seasons.json")),
-                    active: false
-                )
+                    data: SerialData(
+                        path: $0,
+                        title: $0.lastPathComponent!,
+                        seasonsJSON: NSURL.fileURLWithPath(($0.path! + "/seasons.json"))))
             serial.seasons = getSeasons($0, serial: serial)
             return serial
         }
@@ -77,15 +105,14 @@ func getSeasons(seasonsPath: NSURL, serial: Serial) -> [Season]? {
     let dirs = getDirs(seasonsPath)
     if dirs != nil {
         return dirs!.map {
-            var season =
+            let season =
                 Season(
-                    path: $0,
-                    title: $0.lastPathComponent!,
-                    serial: serial,
-                    chapters: nil,
-                    chaptersJSON: NSURL.fileURLWithPath(($0.path! + "/chapters.json")),
-                    active: false
-                )
+                    data: SeasonData(
+                        path: $0,
+                        title: $0.lastPathComponent!,
+                        chaptersJSON: NSURL.fileURLWithPath(($0.path! + "/chapters.json"))
+                    ),
+                    serial: serial)
             season.chapters = getChapters($0, season: season)
             return season
         }
@@ -98,7 +125,9 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
     let files = getFilesWithExtensions(chaptersPath, fileExtension: "srt")
     if files != nil {
         return files!.map {
-            Chapter(path: $0, title: $0.lastPathComponent!, season: season)
+            Chapter(
+                data: ChapterData(path: $0, title: $0.lastPathComponent!),
+                season: season)
         }
     } else {
         return nil

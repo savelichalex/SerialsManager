@@ -18,6 +18,7 @@ class ViewController: NSViewController {
         super.viewDidLoad()
 
         serials = getSerials(dbPath)
+        print(serials?.first?.seasons?.first?.data.title)
         // Do any additional setup after loading the view.
     }
 
@@ -44,7 +45,7 @@ extension ViewController: NSOutlineViewDataSource {
             } else {
                 return 0
             }
-        } else if let i = item as? Chapter {
+        } else if ((item as? Chapter) != nil) {
             return 0
         }
         
@@ -53,20 +54,20 @@ extension ViewController: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         if let i = item as? Serial {
-            return i.seasons?[index]
+            return (i.seasons?[index])!
         } else if let i = item as? Season {
-            return i.chapters?[index]
+            return (i.chapters?[index])!
         }
         
-        return serials?[index]
+        return (serials?[index])!
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         if let i = item as? Serial {
             return i.seasons != nil
         } else if let i = item as? Season {
-            i.chapters != nil
-        } else if let i = item as? Chapter {
+            return i.chapters != nil
+        } else if ((item as? Chapter) != nil) {
             return false
         }
         

@@ -10,8 +10,8 @@
 		8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721D1D2A6F4300C08568 /* AppDelegate.swift */; };
 		843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* SerialsViewController.swift */; };
 		843072221D2A6F4300C08568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843072211D2A6F4300C08568 /* Assets.xcassets */; };
-		843072251D2A6F4300C08568 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 843072231D2A6F4300C08568 /* Main.storyboard */; };
 		843072311D2BB19E00C08568 /* Serials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843072301D2BB19E00C08568 /* Serials.swift */; };
+		84E1828B1D5215DF003A6FB6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84E1828A1D5215DF003A6FB6 /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,9 +19,9 @@
 		8430721D1D2A6F4300C08568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8430721F1D2A6F4300C08568 /* SerialsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialsViewController.swift; sourceTree = "<group>"; };
 		843072211D2A6F4300C08568 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		843072241D2A6F4300C08568 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		843072261D2A6F4300C08568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		843072301D2BB19E00C08568 /* Serials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serials.swift; sourceTree = "<group>"; };
+		84E1828A1D5215DF003A6FB6 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,10 +54,10 @@
 		8430721C1D2A6F4200C08568 /* SerialsManager */ = {
 			isa = PBXGroup;
 			children = (
+				84E1828A1D5215DF003A6FB6 /* Main.storyboard */,
 				8430721D1D2A6F4300C08568 /* AppDelegate.swift */,
 				8430721F1D2A6F4300C08568 /* SerialsViewController.swift */,
 				843072211D2A6F4300C08568 /* Assets.xcassets */,
-				843072231D2A6F4300C08568 /* Main.storyboard */,
 				843072261D2A6F4300C08568 /* Info.plist */,
 				843072301D2BB19E00C08568 /* Serials.swift */,
 			);
@@ -122,8 +122,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84E1828B1D5215DF003A6FB6 /* Main.storyboard in Resources */,
 				843072221D2A6F4300C08568 /* Assets.xcassets in Resources */,
-				843072251D2A6F4300C08568 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,17 +141,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		843072231D2A6F4300C08568 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				843072241D2A6F4300C08568 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		843072271D2A6F4300C08568 /* Debug */ = {

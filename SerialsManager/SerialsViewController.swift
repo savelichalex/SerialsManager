@@ -13,27 +13,22 @@ class SerialsViewController: NSViewController {
     let dbPath = NSURL.fileURLWithPath("/Users/admin/friends-db")
     
     var serials: [Serial]?
-
+    
+    @IBOutlet weak var outlineView: NSOutlineView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         serials = getSerials(dbPath)
         print(serials?.first?.seasons?.first?.data.title)
         // Do any additional setup after loading the view.
     }
-
-    override var representedObject: AnyObject? {
-        didSet {
-        // Update the view, if already l oaded.
-        }
-    }
-
+    
 }
 
 extension SerialsViewController: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
-        print("sdfsdf")
         if let i = item as? Serial {
             if i.seasons != nil {
                 return i.seasons!.count
@@ -75,4 +70,32 @@ extension SerialsViewController: NSOutlineViewDataSource {
         return false
     }
     
+}
+
+extension SerialsViewController: NSOutlineViewDelegate {
+    func outlineView(outlineView: NSOutlineView, viewForTableColumn tableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+        var view: NSTableCellView?
+        
+        if let i = item as? Serial {
+            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            if let textField = view?.textField {
+                textField.stringValue = "Serial: " + i.data.title
+                textField.sizeToFit()
+            }
+        } else if let i = item as? Season {
+            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            if let textField = view?.textField {
+                textField.stringValue = "Season: " + i.data.title
+                textField.sizeToFit()
+            }
+        } else if let i = item as? Chapter {
+            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            if let textField = view?.textField {
+                textField.stringValue = "Chapter: " + i.data.title
+                textField.sizeToFit()
+            }
+        }
+        
+        return view
+    }
 }

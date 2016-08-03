@@ -35,6 +35,17 @@ class SerialsViewController: NSViewController {
             }
         }
     }
+    
+    @IBAction func addNewEntity(sender: NSButton) {
+        let selectedRow = outlineView.selectedRow
+        if selectedRow == -1 {
+            return
+        }
+        if let item = outlineView.itemAtRow(selectedRow) as? Season {
+            addNewChapter(item)
+            outlineView.reloadData()
+        }
+    }
 }
 
 extension SerialsViewController: NSOutlineViewDataSource {

@@ -21,7 +21,7 @@ struct SeasonData {
 }
 
 struct ChapterData {
-    let path: NSURL
+    let path: NSURL?
     let title: String
     let raw: String
 }
@@ -61,6 +61,8 @@ class Chapter {
         self.season = season
     }
 }
+
+
 
 func getDirs(path: NSURL) -> [NSURL]? {
     let dirs: [NSURL]?
@@ -138,4 +140,11 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
     } else {
         return nil
     }
+}
+
+func addNewChapter(season: Season) -> Void {
+    season.chapters?.append(
+        Chapter(data: ChapterData(path: nil, title: "new chapter", raw: ""),
+        season: season
+    ))
 }

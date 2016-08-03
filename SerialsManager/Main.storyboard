@@ -701,7 +701,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="firstColumnOnly" columnReordering="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="16" outlineTableColumn="Y7Z-Dm-P5x" id="n4J-Mw-vCd">
-                                            <rect key="frame" x="0.0" y="0.0" width="248" height="0.0"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="248" height="298"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -761,12 +761,28 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                             </scrollView>
+                            <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="SvY-TJ-nBI">
+                                <rect key="frame" x="221" y="270" width="19" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="19" id="1Nc-J4-T8T"/>
+                                    <constraint firstAttribute="width" constant="19" id="Cfw-wz-5o6"/>
+                                </constraints>
+                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="5LO-6X-k2C">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="addNewEntity:" target="trH-Cx-EQh" id="gAE-hO-tVc"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="IzV-gT-A0u" firstAttribute="top" secondItem="c22-IZ-pVE" secondAttribute="top" id="XFT-dL-gIj"/>
+                            <constraint firstAttribute="trailing" secondItem="SvY-TJ-nBI" secondAttribute="trailing" constant="10" id="dvt-Va-wdt"/>
                             <constraint firstAttribute="bottom" secondItem="IzV-gT-A0u" secondAttribute="bottom" id="eMK-ub-ENF"/>
                             <constraint firstAttribute="trailing" secondItem="IzV-gT-A0u" secondAttribute="trailing" id="hJI-Oe-9hg"/>
                             <constraint firstItem="IzV-gT-A0u" firstAttribute="leading" secondItem="c22-IZ-pVE" secondAttribute="leading" id="mNE-T3-nP9"/>
+                            <constraint firstItem="SvY-TJ-nBI" firstAttribute="top" secondItem="c22-IZ-pVE" secondAttribute="top" constant="10" id="zsj-Wa-8d2"/>
                         </constraints>
                     </view>
                     <connections>
@@ -847,4 +863,7 @@
             <point key="canvasLocation" x="1257" y="477"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="NSAddTemplate" width="11" height="11"/>
+    </resources>
 </document>

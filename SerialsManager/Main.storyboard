@@ -690,24 +690,24 @@
         <scene sceneID="n4C-xS-jsE">
             <objects>
                 <viewController id="trH-Cx-EQh" customClass="SerialsViewController" customModule="SerialsManager" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" misplaced="YES" id="c22-IZ-pVE">
-                        <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                    <view key="view" id="c22-IZ-pVE">
+                        <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <scrollView misplaced="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzV-gT-A0u">
-                                <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                            <scrollView autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="IzV-gT-A0u">
+                                <rect key="frame" x="0.0" y="0.0" width="250" height="300"/>
                                 <clipView key="contentView" id="dgQ-qW-47N">
-                                    <rect key="frame" x="1" y="1" width="448" height="298"/>
+                                    <rect key="frame" x="1" y="1" width="248" height="298"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="firstColumnOnly" columnReordering="NO" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="16" outlineTableColumn="Y7Z-Dm-P5x" id="n4J-Mw-vCd">
-                                            <rect key="frame" x="0.0" y="0.0" width="448" height="298"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="248" height="0.0"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <size key="intercellSpacing" width="3" height="2"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                             <tableColumns>
-                                                <tableColumn width="445" minWidth="40" maxWidth="1000" id="Y7Z-Dm-P5x">
+                                                <tableColumn width="245" minWidth="40" maxWidth="1000" id="Y7Z-Dm-P5x">
                                                     <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                                         <font key="font" metaFont="smallSystem"/>
                                                         <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -721,7 +721,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView identifier="SerialItemCell" id="GSs-zj-9yQ">
-                                                            <rect key="frame" x="1" y="1" width="445" height="17"/>
+                                                            <rect key="frame" x="1" y="1" width="245" height="17"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vfo-PS-G2w">
@@ -741,6 +741,7 @@
                                                 </tableColumn>
                                             </tableColumns>
                                             <connections>
+                                                <action selector="clickOnCell:" target="trH-Cx-EQh" id="C6L-py-NJw"/>
                                                 <outlet property="dataSource" destination="trH-Cx-EQh" id="zNo-i4-4yn"/>
                                                 <outlet property="delegate" destination="trH-Cx-EQh" id="YqT-5Y-cwW"/>
                                             </connections>
@@ -749,7 +750,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </clipView>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="240" id="gvj-Vh-A5x"/>
+                                    <constraint firstAttribute="width" constant="250" id="bRK-Rl-4L6"/>
                                 </constraints>
                                 <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="x43-KH-f1g">
                                     <rect key="frame" x="1" y="283" width="448" height="16"/>
@@ -774,16 +775,72 @@
                 </viewController>
                 <customObject id="FzB-yh-e1s" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1257" y="60"/>
+            <point key="canvasLocation" x="1157" y="60"/>
         </scene>
-        <!--View Controller-->
+        <!--Chapter Details View Controller-->
         <scene sceneID="AdG-Sz-54H">
             <objects>
-                <viewController id="WuS-VP-zNE" sceneMemberID="viewController">
+                <viewController id="WuS-VP-zNE" customClass="ChapterDetailsViewController" customModule="SerialsManager" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="Ggb-0r-ZqS">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ufM-ZP-5tl">
+                                <rect key="frame" x="18" y="263" width="101" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Choose chapter" id="UEd-Nl-7zp">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7Q0-bP-yJo">
+                                <rect key="frame" x="18" y="232" width="107" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Chapter content:" id="sN4-6e-6mS">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <scrollView horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Scv-4b-pOS">
+                                <rect key="frame" x="20" y="0.0" width="410" height="229"/>
+                                <clipView key="contentView" id="yCG-Og-y6h">
+                                    <rect key="frame" x="1" y="1" width="408" height="227"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <subviews>
+                                        <textView importsGraphics="NO" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" usesFontPanel="YES" verticallyResizable="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" spellingCorrection="YES" smartInsertDelete="YES" id="PjT-x5-wRg">
+                                            <rect key="frame" x="0.0" y="0.0" width="408" height="227"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                            <size key="minSize" width="408" height="227"/>
+                                            <size key="maxSize" width="463" height="10000000"/>
+                                            <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                            <size key="minSize" width="408" height="227"/>
+                                            <size key="maxSize" width="463" height="10000000"/>
+                                        </textView>
+                                    </subviews>
+                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </clipView>
+                                <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="x9f-HM-BOn">
+                                    <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                                <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="2pc-jc-m7o">
+                                    <rect key="frame" x="393" y="1" width="16" height="227"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </scroller>
+                            </scrollView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="Scv-4b-pOS" secondAttribute="trailing" constant="20" id="baX-JX-Nr5"/>
+                            <constraint firstAttribute="bottom" secondItem="Scv-4b-pOS" secondAttribute="bottom" id="cxT-dl-re4"/>
+                            <constraint firstItem="Scv-4b-pOS" firstAttribute="leading" secondItem="Ggb-0r-ZqS" secondAttribute="leading" constant="20" id="fkz-Zg-1KD"/>
+                            <constraint firstItem="Scv-4b-pOS" firstAttribute="top" secondItem="Ggb-0r-ZqS" secondAttribute="top" constant="71" id="sc8-i7-duh"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="chapterRawTextView" destination="PjT-x5-wRg" id="stV-GW-GM0"/>
+                        <outlet property="chapterTitle" destination="ufM-ZP-5tl" id="oX6-9I-FGU"/>
+                    </connections>
                 </viewController>
                 <customObject id="m4N-mL-RzI" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

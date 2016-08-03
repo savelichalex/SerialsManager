@@ -20,10 +20,21 @@ class SerialsViewController: NSViewController {
         super.viewDidLoad()
         
         serials = getSerials(dbPath)
-        print(serials?.first?.seasons?.first?.data.title)
         // Do any additional setup after loading the view.
     }
     
+    @IBAction func clickOnCell(sender: NSOutlineView) {
+        let item = sender.itemAtRow(sender.clickedRow)
+        if let i = item as? Serial {
+            print(i.data.title)
+        } else if let i = item as? Season {
+            print(i.data.title)
+        } else if let i = item as? Chapter {
+            if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
+                chapterController.chapter = i
+            }
+        }
+    }
 }
 
 extension SerialsViewController: NSOutlineViewDataSource {

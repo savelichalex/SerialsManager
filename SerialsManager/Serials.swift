@@ -23,6 +23,7 @@ struct SeasonData {
 struct ChapterData {
     let path: NSURL
     let title: String
+    let raw: String
 }
 
 class Serial {
@@ -125,9 +126,14 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
     let files = getFilesWithExtensions(chaptersPath, fileExtension: "srt")
     if files != nil {
         return files!.map {
-            Chapter(
-                data: ChapterData(path: $0, title: $0.lastPathComponent!),
-                season: season)
+            do {
+                let chapterText = try String(contentsOfURL: $0, encoding: NSUTF8StringEncoding)
+                return Chapter(
+                    data: ChapterData(path: $0, title: $0.lastPathComponent!, raw: chapterText),
+                    season: season)
+            } catch {
+                exit(1)
+            }
         }
     } else {
         return nil

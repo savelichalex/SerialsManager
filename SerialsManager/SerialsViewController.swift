@@ -25,16 +25,16 @@ class SerialsViewController: NSViewController {
     
     @IBAction func clickOnCell(sender: NSOutlineView) {
         let item = sender.itemAtRow(sender.clickedRow)
-        if let i = item as? Chapter {
-            if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
-                chapterController.chapter = i
-            }
-        }
         if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
             if let currentChapter = chapterController.chapter {
                 let (title, text) = chapterController.getCurrentData()
                 updateChapterData(currentChapter, text: text, title: title)
                 outlineView.reloadData()
+            }
+        }
+        if let i = item as? Chapter {
+            if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
+                chapterController.chapter = i
             }
         }
     }

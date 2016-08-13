@@ -30,6 +30,7 @@ class SerialsViewController: NSViewController {
                 let (title, text) = chapterController.getCurrentData()
                 updateChapterData(currentChapter, text: text, title: title)
                 outlineView.reloadData()
+                outlineView.selectRowIndexes(NSIndexSet(index: sender.clickedRow), byExtendingSelection: true)
             }
         }
         if let i = item as? Chapter {

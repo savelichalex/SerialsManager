@@ -14,8 +14,15 @@ class ChapterDetailsViewController: NSViewController {
     @IBOutlet weak var chapterTitle: NSTextField?
     var chapter: Chapter? {
         didSet {
-            chapterTitle?.stringValue = (chapter?.data.title)!
-            chapterRawTextView?.textStorage?.mutableString.setString((chapter?.data.raw)!)
+            chapterTitle?.stringValue = chapter?.data.title ?? ""
+            chapterRawTextView?.textStorage?.mutableString.setString(chapter?.data.raw ?? "")
         }
+    }
+    
+    func getCurrentData() -> (String?, String?) {
+        return (
+            chapterTitle?.stringValue,
+            chapterRawTextView?.textStorage?.mutableString as String?
+        )
     }
 }

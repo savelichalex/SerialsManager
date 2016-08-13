@@ -22,8 +22,8 @@ struct SeasonData {
 
 struct ChapterData {
     let path: NSURL?
-    let title: String
-    let raw: String
+    let title: String?
+    let raw: String?
 }
 
 class Serial {
@@ -53,7 +53,7 @@ class Season {
 }
 
 class Chapter {
-    let data: ChapterData
+    var data: ChapterData
     let season: Season?
     
     init(data: ChapterData, season: Season) {
@@ -144,7 +144,13 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
 
 func addNewChapter(season: Season) -> Void {
     season.chapters?.append(
-        Chapter(data: ChapterData(path: nil, title: "new chapter", raw: ""),
+        Chapter(data: ChapterData(path: nil, title: "new chapter", raw: nil),
         season: season
     ))
+}
+
+func updateChapterData(chapter: Chapter, text: String?, title: String?) -> Void {
+    let currentPath = chapter.data.path;
+    let newData = ChapterData(path: currentPath, title: title, raw: text)
+    chapter.data = newData
 }

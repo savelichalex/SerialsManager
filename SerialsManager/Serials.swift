@@ -127,11 +127,14 @@ func getSeasons(seasonsPath: NSURL, serial: Serial) -> [Season]? {
 func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
     let files = getFilesWithExtensions(chaptersPath, fileExtension: "srt")
     if files != nil {
-        return files!.map {
+        return files!.enumerate().map { (index, element) in
             do {
-                let chapterText = try String(contentsOfURL: $0, encoding: NSUTF8StringEncoding)
+                let chapterText = try String(contentsOfURL: element, encoding: NSUTF8StringEncoding)
                 return Chapter(
-                    data: ChapterData(path: $0, title: $0.lastPathComponent!, raw: chapterText),
+                    data: ChapterData(
+                        path: element,
+                        title: String(index + 1),
+                        raw: chapterText),
                     season: season)
             } catch {
                 exit(1)
@@ -142,15 +145,21 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
     }
 }
 
-func addNewChapter(season: Season) -> Void {
-    season.chapters?.append(
-        Chapter(data: ChapterData(path: nil, title: "new chapter", raw: nil),
-        season: season
-    ))
+func addNewChapter(season: Season) -> Chapter {
+    let newChapter =
+        Chapter(
+            data: ChapterData(path: nil, title: String((season.chapters?.count ?? 0) + 1), raw: nil),
+            season: season
+        )
+    season.chapters?.append(newChapter)
+    return newChapter
 }
 
-func updateChapterData(chapter: Chapter, text: String?, title: String?) -> Void {
-    let currentPath = chapter.data.path;
-    let newData = ChapterData(path: currentPath, title: title, raw: text)
+func updateChapterData(chapter: Chapter, text: String?) -> Void {
+    let newData = ChapterData(
+        path: chapter.data.path,
+        title: chapter.data.title,
+        raw: text
+    )
     chapter.data = newData
 }

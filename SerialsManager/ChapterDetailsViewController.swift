@@ -24,11 +24,8 @@ class ChapterDetailsViewController: NSViewController {
         }
     }
     
-    func getCurrentData() -> (String?, String?) {
-        return (
-            chapterTitle?.stringValue,
-            chapterRawTextView?.textStorage?.mutableString as String?
-        )
+    func getCurrentData() -> String? {
+        return chapterRawTextView?.textStorage?.mutableString as String?
     }
     
     @IBAction func loadContentFromURL(sender: NSButton) {

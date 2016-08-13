@@ -27,16 +27,14 @@ class SerialsViewController: NSViewController {
         let item = sender.itemAtRow(sender.clickedRow)
         if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
             if let currentChapter = chapterController.chapter {
-                let (title, text) = chapterController.getCurrentData()
-                updateChapterData(currentChapter, text: text, title: title)
+                let text = chapterController.getCurrentData()
+                updateChapterData(currentChapter, text: text)
                 outlineView.reloadData()
                 outlineView.selectRowIndexes(NSIndexSet(index: sender.clickedRow), byExtendingSelection: true)
             }
         }
         if let i = item as? Chapter {
-            if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
-                chapterController.chapter = i
-            }
+            setChapterInChapterController(i)
         }
     }
     
@@ -46,8 +44,21 @@ class SerialsViewController: NSViewController {
             return
         }
         if let item = outlineView.itemAtRow(selectedRow) as? Season {
-            addNewChapter(item)
+            let newChapter = addNewChapter(item)
             outlineView.reloadData()
+            setChapterInChapterController(newChapter)
+            let newRowIndex = selectedRow + item.chapters!.count
+            outlineView.expandItem(item)
+            outlineView.selectRowIndexes(NSIndexSet(index: newRowIndex), byExtendingSelection: true)
+        }
+    }
+    
+    func setChapterInChapterController(chapter: Chapter) -> Bool {
+        if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
+            chapterController.chapter = chapter
+            return true
+        } else {
+            return false
         }
     }
 }
@@ -117,7 +128,7 @@ extension SerialsViewController: NSOutlineViewDelegate {
         } else if let i = item as? Chapter {
             view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
-                textField.stringValue = "Chapter: " + (i.data.title ?? "unknown")
+                textField.stringValue = "Chapter " + (i.data.title ?? "unknown")
                 textField.sizeToFit()
             }
         }

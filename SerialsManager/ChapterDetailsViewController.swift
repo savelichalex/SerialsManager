@@ -11,7 +11,9 @@ import Cocoa
 class ChapterDetailsViewController: NSViewController {
 
     @IBOutlet var chapterRawTextView: NSTextView?
-    @IBOutlet weak var chapterTitle: NSTextField?
+    
+    @IBOutlet weak var chapterTitle: NSTextField!
+    
     var chapter: Chapter? {
         didSet {
             chapterTitle?.stringValue = chapter?.data.title ?? ""

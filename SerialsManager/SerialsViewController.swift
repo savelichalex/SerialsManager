@@ -34,6 +34,7 @@ class SerialsViewController: NSViewController {
             if let currentChapter = chapterController.chapter {
                 let (title, text) = chapterController.getCurrentData()
                 updateChapterData(currentChapter, text: text, title: title)
+                outlineView.reloadData()
             }
         }
     }

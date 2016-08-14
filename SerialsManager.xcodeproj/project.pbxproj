@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		842D06511D60DE610077E766 /* AppConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 842D06501D60DE610077E766 /* AppConfig.plist */; };
 		8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721D1D2A6F4300C08568 /* AppDelegate.swift */; };
 		843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* SerialsViewController.swift */; };
 		843072221D2A6F4300C08568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843072211D2A6F4300C08568 /* Assets.xcassets */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		842D06501D60DE610077E766 /* AppConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = AppConfig.plist; path = SerialsManager/AppConfig.plist; sourceTree = "<group>"; };
 		8430721A1D2A6F4200C08568 /* SerialsManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SerialsManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8430721D1D2A6F4300C08568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8430721F1D2A6F4300C08568 /* SerialsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialsViewController.swift; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 		843072111D2A6F4200C08568 = {
 			isa = PBXGroup;
 			children = (
+				842D06501D60DE610077E766 /* AppConfig.plist */,
 				8430721C1D2A6F4200C08568 /* SerialsManager */,
 				8430721B1D2A6F4200C08568 /* Products */,
 			);
@@ -125,6 +128,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				842D06511D60DE610077E766 /* AppConfig.plist in Resources */,
 				84E1828B1D5215DF003A6FB6 /* Main.storyboard in Resources */,
 				843072221D2A6F4300C08568 /* Assets.xcassets in Resources */,
 			);

@@ -61,6 +61,10 @@ class SerialsViewController: NSViewController {
             return false
         }
     }
+    
+    func getCurrentSerials() -> [Serial]? {
+        return serials
+    }
 }
 
 extension SerialsViewController: NSOutlineViewDataSource {

@@ -17,7 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		842D06501D60DE610077E766 /* AppConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = AppConfig.plist; path = SerialsManager/AppConfig.plist; sourceTree = "<group>"; };
+		842D06501D60DE610077E766 /* AppConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppConfig.plist; sourceTree = "<group>"; };
 		8430721A1D2A6F4200C08568 /* SerialsManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SerialsManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8430721D1D2A6F4300C08568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8430721F1D2A6F4300C08568 /* SerialsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialsViewController.swift; sourceTree = "<group>"; };
@@ -42,7 +42,6 @@
 		843072111D2A6F4200C08568 = {
 			isa = PBXGroup;
 			children = (
-				842D06501D60DE610077E766 /* AppConfig.plist */,
 				8430721C1D2A6F4200C08568 /* SerialsManager */,
 				8430721B1D2A6F4200C08568 /* Products */,
 			);
@@ -59,6 +58,7 @@
 		8430721C1D2A6F4200C08568 /* SerialsManager */ = {
 			isa = PBXGroup;
 			children = (
+				842D06501D60DE610077E766 /* AppConfig.plist */,
 				84E1828A1D5215DF003A6FB6 /* Main.storyboard */,
 				8430721D1D2A6F4300C08568 /* AppDelegate.swift */,
 				8430721F1D2A6F4300C08568 /* SerialsViewController.swift */,

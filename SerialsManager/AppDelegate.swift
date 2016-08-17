@@ -18,8 +18,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to initialize your application
         if let path = NSBundle.mainBundle().pathForResource("AppConfig", ofType: "plist") {
             let appConfig = NSDictionary(contentsOfFile: path)
-            print(appConfig)
-            // use config somehow
+            
+            let dropboxAppKey = appConfig!["DropboxAppKey"] as! String
+            let dropboxAccessToken = appConfig!["DropboxOAuthAccessToken"] as! String
+            
+            Dropbox.setupWithAppKey(dropboxAppKey)
+            let client =
+                DropboxClient(
+                    accessToken: DropboxAccessToken(
+                        accessToken: dropboxAccessToken,
+                        uid: "")
+                )
+            Dropbox.authorizedClient = client
+            DropboxClient.sharedClient = client
+            client.users.getCurrentAccount().response { response, error in
+                if let account = response {
+                    print("Hello \(account.name.givenName)")
+                } else {
+                    print(error)
+                }
+            }
         }
         
     }

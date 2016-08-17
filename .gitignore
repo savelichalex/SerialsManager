@@ -27,3 +27,6 @@ Temporary Items
 
 # Config files
 SerialsManager/AppConfig.plist
+
+# CocoaPods
+Pods/*

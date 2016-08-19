@@ -8,6 +8,7 @@
 
 import Cocoa
 import SwiftyDropbox
+import Alamofire
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -54,13 +55,86 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func saveAll(sender: NSMenuItem) {
         if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
             let serials = vc.getCurrentSerials()
-            if serials != nil {
-                uploadSerials(serials!)
+            guard (serials != nil) else {
+                print("No one serial found")
+                return
+            }
+            uploadSerials(serials!)
+                .then {
+                    print("Success")
+                }.error { error in
+                    print(error)
+                }
+        }
+    }
+    
+    func uploadSerials(serials: [Serial]) -> Promise<Void> {
+        return promise { resolve, reject in
+            do {
+                let serialsJSON = try self.toJSON(serials) { serial in
+                    let serialDict = NSMutableDictionary()
+                    serialDict.setValue(serial.data.title, forKey: "title")
+                    serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "seasons")
+                    return serialDict
+                }
+                resolve(serialsJSON)
+            } catch let error {
+                reject(error)
+            }
+        }.then { (serialsJSON: String) in
+            self.uploadFile(
+                "/serials.json",
+                body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+            )
+        }.then { _ in
+            let promises: [Promise<Files.FolderMetadata>] =
+                serials.filter {
+                    $0.seasons != nil
+                    }.map { serial in
+                        self.createFolder(serial.data.title)
+                            .then { _ in
+                                self.uploadSeasons(
+                                    serial.seasons!,
+                                    prefix: "/" + serial.data.title
+                                )
+                        }
+            }
+            return when(promises)
+        }
+    }
+    
+    func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata> {
+        return promise { resolve, reject in
+            if let client = Dropbox.authorizedClient {
+                client.files.upload(
+                    path: path,
+                    body: body
+                    ).responsePromise().then { data in
+                        resolve(data)
+                    }.error { error in
+                        reject(error)
+                    }
+            } else {
+                reject("Unauthorized" as! ErrorType)
             }
         }
     }
     
-    func uploadSerials(serials: [Serial]) {
+    func createFolder(path: String) -> Promise<Files.FolderMetadata> {
+        return promise { resolve, reject in
+            if let client = Dropbox.authorizedClient {
+                client.files.createFolder(
+                    path: path
+                ).responsePromise().then { data in
+                    resolve(data)
+                }.error { error in
+                    reject(error)
+                }
+            }
+        }
+    }
+    
+    func uploadSerials2(serials: [Serial]) {
         do {
             if let client = Dropbox.authorizedClient {
                 let serialsJSON = try toJSON(serials) { serial in
@@ -106,7 +180,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func uploadSeasons(seasons: [Season], prefix: String) {
+    func uploadSeasons(seasons: [Season], prefix: String) -> Promise<Void> {
+        
+    }
+    
+    func uploadSeasons2(seasons: [Season], prefix: String) {
         do {
             if let client = Dropbox.authorizedClient {
                 let seasonsJSON = try self.toJSON(seasons) { season in

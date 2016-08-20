@@ -13,9 +13,6 @@
 		843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* SerialsViewController.swift */; };
 		843072221D2A6F4300C08568 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843072211D2A6F4300C08568 /* Assets.xcassets */; };
 		843072311D2BB19E00C08568 /* Serials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843072301D2BB19E00C08568 /* Serials.swift */; };
-		84CBBB7E1D6717080052785A /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CBBB7D1D6717080052785A /* Promise.swift */; };
-		84CBBB801D6717440052785A /* Queue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CBBB7F1D6717440052785A /* Queue.swift */; };
-		84CBBB821D673A930052785A /* BabelClient+Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CBBB811D673A930052785A /* BabelClient+Promise.swift */; };
 		84E1828B1D5215DF003A6FB6 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 84E1828A1D5215DF003A6FB6 /* Main.storyboard */; };
 		84E1828D1D524403003A6FB6 /* ChapterDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E1828C1D524403003A6FB6 /* ChapterDetailsViewController.swift */; };
 /* End PBXBuildFile section */
@@ -31,9 +28,6 @@
 		843072211D2A6F4300C08568 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		843072261D2A6F4300C08568 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		843072301D2BB19E00C08568 /* Serials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Serials.swift; sourceTree = "<group>"; };
-		84CBBB7D1D6717080052785A /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Promise.swift; path = SerialsManager/Vendor/Promise.swift; sourceTree = "<group>"; };
-		84CBBB7F1D6717440052785A /* Queue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Queue.swift; path = SerialsManager/Vendor/Queue.swift; sourceTree = "<group>"; };
-		84CBBB811D673A930052785A /* BabelClient+Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BabelClient+Promise.swift"; sourceTree = "<group>"; };
 		84E1828A1D5215DF003A6FB6 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		84E1828C1D524403003A6FB6 /* ChapterDetailsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChapterDetailsViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -61,7 +55,6 @@
 		843072111D2A6F4200C08568 = {
 			isa = PBXGroup;
 			children = (
-				84CBBB7C1D6716D10052785A /* Vendor */,
 				8430721C1D2A6F4200C08568 /* SerialsManager */,
 				8430721B1D2A6F4200C08568 /* Products */,
 				FD58906575B2675F739E917E /* Pods */,
@@ -90,16 +83,6 @@
 				84E1828C1D524403003A6FB6 /* ChapterDetailsViewController.swift */,
 			);
 			path = SerialsManager;
-			sourceTree = "<group>";
-		};
-		84CBBB7C1D6716D10052785A /* Vendor */ = {
-			isa = PBXGroup;
-			children = (
-				84CBBB7D1D6717080052785A /* Promise.swift */,
-				84CBBB7F1D6717440052785A /* Queue.swift */,
-				84CBBB811D673A930052785A /* BabelClient+Promise.swift */,
-			);
-			name = Vendor;
 			sourceTree = "<group>";
 		};
 		FD58906575B2675F739E917E /* Pods */ = {
@@ -234,11 +217,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */,
-				84CBBB801D6717440052785A /* Queue.swift in Sources */,
 				84E1828D1D524403003A6FB6 /* ChapterDetailsViewController.swift in Sources */,
-				84CBBB7E1D6717080052785A /* Promise.swift in Sources */,
 				8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */,
-				84CBBB821D673A930052785A /* BabelClient+Promise.swift in Sources */,
 				843072311D2BB19E00C08568 /* Serials.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

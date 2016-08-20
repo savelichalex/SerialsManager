@@ -8,7 +8,7 @@
 
 import Cocoa
 import SwiftyDropbox
-import Alamofire
+import PromiseKit
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -43,9 +43,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
     }
     
-    enum SerializationError: ErrorType {
+    enum SerialsError: ErrorType, CustomStringConvertible {
+        case UploadError(description: String)
         case NotValid
         case Unknown
+        
+        var description: String {
+            switch self {
+                case .UploadError(let description): return description
+                case .NotValid: return "JSON is not valid"
+                case .Unknown: return "Unknow error"
+            }
+        }
     }
 
     func applicationWillTerminate(aNotification: NSNotification) {
@@ -60,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return
             }
             uploadSerials(serials!)
-                .then {
+                .then { serials in
                     print("Success")
                 }.error { error in
                     print(error)
@@ -68,8 +77,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func uploadSerials(serials: [Serial]) -> Promise<Void> {
-        return promise { resolve, reject in
+    func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata> {
+        return Promise { resolve, reject in
+            if let client = Dropbox.authorizedClient {
+                client.files.upload(
+                    path: path,
+                    mode: .Overwrite,
+                    body: body
+                    ).response { response, error in
+                        guard error == nil else {
+                            reject(SerialsError.UploadError(description: error!.description))
+                            return
+                        }
+                        resolve(response!)
+                }
+            } else {
+                reject("Unauthorized" as! ErrorType)
+            }
+        }
+    }
+    
+    func createFolder(path: String) -> Promise<Files.FolderMetadata> {
+        return Promise { resolve, reject in
+            if let client = Dropbox.authorizedClient {
+                client.files.createFolder(
+                    path: path
+                    ).response { response, error in
+                        guard error == nil else {
+                            resolve(Files.FolderMetadata(name: path, pathLower: path))
+                            return
+                        }
+                        resolve(response!)
+                }
+            } else {
+                reject("Unauthorized" as! ErrorType)
+            }
+        }
+    }
+    
+    func uploadSerials(serials: [Serial]) -> Promise<[Serial]> {
+        return Promise { resolve, reject in
             do {
                 let serialsJSON = try self.toJSON(serials) { serial in
                     let serialDict = NSMutableDictionary()
@@ -81,208 +128,106 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             } catch let error {
                 reject(error)
             }
-        }.then { (serialsJSON: String) in
-            self.uploadFile(
+        }.then { (serialsJSON: String) -> Promise<Files.FileMetadata> in
+            return self.uploadFile(
                 "/serials.json",
                 body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
             )
         }.then { _ in
-            let promises: [Promise<Files.FolderMetadata>] =
+            let serialsWithSeasons =
                 serials.filter {
                     $0.seasons != nil
-                    }.map { serial in
-                        self.createFolder(serial.data.title)
-                            .then { _ in
-                                self.uploadSeasons(
-                                    serial.seasons!,
-                                    prefix: "/" + serial.data.title
-                                )
-                        }
-            }
+                }
+            let promises =
+                serialsWithSeasons.map { (serial: Serial) -> Promise<Files.FolderMetadata> in
+                    return self.createFolder("/" + serial.data.title)
+                }
             return when(promises)
-        }
-    }
-    
-    func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata> {
-        return promise { resolve, reject in
-            if let client = Dropbox.authorizedClient {
-                client.files.upload(
-                    path: path,
-                    body: body
-                    ).responsePromise().then { data in
-                        resolve(data)
-                    }.error { error in
-                        reject(error)
-                    }
-            } else {
-                reject("Unauthorized" as! ErrorType)
+                .then { _ in
+                    return serialsWithSeasons
             }
         }
     }
     
-    func createFolder(path: String) -> Promise<Files.FolderMetadata> {
-        return promise { resolve, reject in
-            if let client = Dropbox.authorizedClient {
-                client.files.createFolder(
-                    path: path
-                ).responsePromise().then { data in
-                    resolve(data)
-                }.error { error in
-                    reject(error)
-                }
-            }
-        }
-    }
-    
-    func uploadSerials2(serials: [Serial]) {
-        do {
-            if let client = Dropbox.authorizedClient {
-                let serialsJSON = try toJSON(serials) { serial in
-                    let serialDict = NSMutableDictionary()
-                    serialDict.setValue(serial.data.title, forKey: "title")
-                    serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "seasons")
-                    return serialDict
-                }
-                print("Upload to /serials.json")
-                client.files.upload(
-                    path: "/serials.json",
-                    body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-                    ).response { response, error in
-                        if response != nil {
-                            for serial in serials {
-                                if serial.seasons != nil {
-                                    print("Create folder \(serial.data.title)")
-                                    client.files.createFolder(
-                                        path: serial.data.title
-                                        ).response { response, error in
-                                            if response != nil {
-                                                self.uploadSeasons(
-                                                    serial.seasons!,
-                                                    prefix: "/" + serial.data.title
-                                                )
-                                            } else {
-                                                print(error!)
-                                            }
-                                    }
-                                }
-                            }
-                        } else {
-                            print(error!)
-                        }
-                }
-            }
-        } catch SerializationError.NotValid {
-            print("JSON not valid")
-        } catch SerializationError.Unknown {
-            print("Unknown error while try serialize")
-        } catch {
-            print("Unknown error while try serialize")
-        }
-    }
-    
-    func uploadSeasons(seasons: [Season], prefix: String) -> Promise<Void> {
-        
-    }
-    
-    func uploadSeasons2(seasons: [Season], prefix: String) {
-        do {
-            if let client = Dropbox.authorizedClient {
-                let seasonsJSON = try self.toJSON(seasons) { season in
-                    let seasonDict = NSMutableDictionary()
-                    seasonDict.setValue(season.data.title, forKey: "title")
-                    seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey: "chapters")
-                    return seasonDict
-                }
-                print("Upload to \(prefix + "/chapters.json")")
-                client.files.upload(
-                    path: prefix + "/chapters.json",
-                    body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-                    ).response {
-                        response, error in
-                        if response != nil {
-                            for season in seasons {
-                                if season.chapters != nil {
-                                    // create folder for season
-                                    print("Create folder \(prefix + "/" + season.data.title)")
-                                    client.files.createFolder(
-                                        path: prefix + "/" + season.data.title
-                                        ).response { response, error in
-                                            if response != nil {
-                                                self.uploadChapters(
-                                                    season.chapters!,
-                                                    prefix: prefix + "/" + season.data.title
-                                                )
-                                            } else {
-                                                print(error!)
-                                            }
-                                    }
-                                }
-                            }
-                        } else {
-                            print(error!)
-                        }
-                }
-            }
-        } catch SerializationError.NotValid {
-            print("JSON not valid")
-        } catch SerializationError.Unknown {
-            print("Unknown error while try serialize")
-        } catch {
-            print("Unknown error while try serialize")
-        }
-    }
-    
-    func uploadChapters(chapters: [Chapter], prefix: String) {
-        do {
-            if let client = Dropbox.authorizedClient {
-                let chaptersJSON = try self.toJSON(chapters) { chapter in
-                    let chapterDict = NSMutableDictionary()
-                    chapterDict.setValue(chapter.data.title, forKey: "title")
-                    let chapterSrtPathFirstPart = chapter.season!.serial!.data.title + "/" + chapter.season!.data.title + "/"
-                    let chapterSrtPath = chapterSrtPathFirstPart + chapter.data.title! + ".srt"
-                    chapterDict.setValue(chapterSrtPath, forKey: "srt")
-                    return chapterDict
-                }
-                client.files.upload(
-                    path: prefix + "/chapters.json",
-                    body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-                ).response { response, error in
-                    if response != nil {
-                        for chapter in chapters {
-                            // save chapter raw
-                            client.files.upload(
-                                path: prefix + "/" + chapter.data.title! + ".srt",
-                                body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
-                            ).response { response, error in
-                                if response == nil {
-                                    print(error!)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch SerializationError.NotValid {
-            print("JSON not valid")
-        } catch SerializationError.Unknown {
-            print("Unknown error while try serialize")
-        } catch {
-            print("Unknown error while try serialize")
-        }
-    }
+//    func uploadSeasons(seasons: [Season], prefix: String) -> (_: Files.FolderMetadata) -> Promise<Void> {
+//        return Promise { resolve, reject in
+//            do {
+//                let seasonsJSON = try self.toJSON(seasons) { season in
+//                    let seasonDict = NSMutableDictionary()
+//                    seasonDict.setValue(season.data.title, forKey: "title")
+//                    seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "chapters")
+//                    return seasonDict
+//                }
+//                resolve(seasonsJSON)
+//            } catch let error {
+//                reject(error)
+//            }
+//        }.then { (seasonsJSON: String) -> Promise<Files.FileMetadata> in
+//            return self.uploadFile(
+//                prefix + "/chapters.json",
+//                body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+//            )
+//        }.then { _ in
+//            let seasonsWithChapters =
+//                seasons.filter { $0.chapters != nil }
+//            let promisess =
+//                seasonsWithChapters.map { season in
+//                    let folder = prefix + "/" + season.data.title
+//                    return self.createFolder(folder)
+//                        .then(self.uploadChapters(
+//                            season.chapters!,
+//                            prefix: folder
+//                        ))
+//            }
+//            return when(promises)
+//        }
+//    }
+//    
+//    func uploadChapters(chapters: [Chapter], prefix: String) -> (_: Files.FolderMetadata) -> Promise<Void> {
+//        return Promise { resolve, reject in
+//            do {
+//                let chaptersJSON = try self.toJSON(chapters) { chapter in
+//                    let chapterDict = NSMutableDictionary()
+//                    chapterDict.setValue(chapter.data.title, forKey: "title")
+//                    let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
+//                    chapterDict.setValue(chapterSrtPath, forKey: "srt")
+//                    return chapterDict
+//                }
+//                resolve(chaptersJSON)
+//            } catch let error {
+//                reject(error)
+//            }
+//        }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
+//            return self.uploadFile(
+//                prefix + "/chapters.json",
+//                body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+//            )
+//        }.then { _ in
+//            let promises =
+//                chapters.map { chapter in
+//                    return self.uploadFile(
+//                        prefix + "/" + chapter.data.title! + ".srt",
+//                        body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
+//                    )
+//            }
+//            return when(promises).then { _ in
+//                print("Uploaded")
+//            }
+//        }
+//    }
     
     func toJSON<T>(items: [T], _ itemToDict: (T) -> NSMutableDictionary) throws -> String {
         let toDicts: [NSMutableDictionary] = items.map(itemToDict)
         let isValid = NSJSONSerialization.isValidJSONObject(toDicts)
         if !isValid {
-            throw SerializationError.NotValid
+            throw SerialsError.NotValid
         }
         var jsonString: String;
         do {
             let serialJSON = try NSJSONSerialization.dataWithJSONObject(toDicts, options: NSJSONWritingOptions())
             jsonString = NSString(data: serialJSON, encoding: NSUTF8StringEncoding) as! String
         } catch {
-            throw SerializationError.Unknown
+            throw SerialsError.Unknown
         }
         return jsonString;
     }

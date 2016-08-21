@@ -70,7 +70,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
             typealias Seasons = [Season];
             uploadSerials(serials!)
-                .then { (serials: [Serial]) -> Seasons in
+                .then { (serials: [Serial]) -> Promise<[Seasons]> in
+//                    let seasons: [Seasons] =
+//                        serials.map { $0.seasons! }
                     let promises: [Promise<Seasons>] =
                         serials.map { serial in
                             return self.uploadSeasons(
@@ -79,11 +81,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             )
                         }
                     
-                    return join(promises).then { (seasons: [Seasons]) -> Seasons in
-                        return seasons.reduce([], combine: +)
-                    }
+                    let afterAll: Promise<[Seasons]> = join(promises)
+                    
+                    return afterAll
                 }
-                .then { serials in
+                .then { (seasons: [Seasons]) -> Seasons in
+                    return seasons.reduce([], combine: +)
+                }.then { _ in
                     print("Success")
                 }.error { error in
                     print(error)

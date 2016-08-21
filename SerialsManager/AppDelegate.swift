@@ -69,6 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 return
             }
             typealias Seasons = [Season];
+            typealias Chapters = [Chapter];
             uploadSerials(serials!)
                 .then { (serials: [Serial]) -> Promise<[Seasons]> in
 //                    let seasons: [Seasons] =
@@ -81,12 +82,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             )
                         }
                     
-                    let afterAll: Promise<[Seasons]> = join(promises)
-                    
-                    return afterAll
+                    return join(promises)
                 }
                 .then { (seasons: [Seasons]) -> Seasons in
                     return seasons.reduce([], combine: +)
+                }.then { (seasons: Seasons) -> Promise<[Chapters]> in
+                    let promises: [Promise<Chapters>] =
+                        seasons.map { season in
+                            return self.uploadChapters(
+                                season.chapters!,
+                                prefix: "/" + season.serial!.data.title + "/" + season.data.title
+                            )
+                    }
+                    
+                    return join(promises)
                 }.then { _ in
                     print("Success")
                 }.error { error in
@@ -199,39 +208,39 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-//
-//    func uploadChapters(chapters: [Chapter], prefix: String) -> (_: Files.FolderMetadata) -> Promise<Void> {
-//        return Promise { resolve, reject in
-//            do {
-//                let chaptersJSON = try self.toJSON(chapters) { chapter in
-//                    let chapterDict = NSMutableDictionary()
-//                    chapterDict.setValue(chapter.data.title, forKey: "title")
-//                    let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
-//                    chapterDict.setValue(chapterSrtPath, forKey: "srt")
-//                    return chapterDict
-//                }
-//                resolve(chaptersJSON)
-//            } catch let error {
-//                reject(error)
-//            }
-//        }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
-//            return self.uploadFile(
-//                prefix + "/chapters.json",
-//                body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-//            )
-//        }.then { _ in
-//            let promises =
-//                chapters.map { chapter in
-//                    return self.uploadFile(
-//                        prefix + "/" + chapter.data.title! + ".srt",
-//                        body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
-//                    )
-//            }
-//            return when(promises).then { _ in
-//                print("Uploaded")
-//            }
-//        }
-//    }
+
+    func uploadChapters(chapters: [Chapter], prefix: String) -> Promise<[Chapter]> {
+        return Promise { resolve, reject in
+            do {
+                let chaptersJSON = try self.toJSON(chapters) { chapter in
+                    let chapterDict = NSMutableDictionary()
+                    chapterDict.setValue(chapter.data.title, forKey: "title")
+                    let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
+                    chapterDict.setValue(chapterSrtPath, forKey: "srt")
+                    return chapterDict
+                }
+                resolve(chaptersJSON)
+            } catch let error {
+                reject(error)
+            }
+        }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
+            return self.uploadFile(
+                prefix + "/chapters.json",
+                body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+            )
+        }.then { _ in
+            let promises =
+                chapters.map { chapter in
+                    return self.uploadFile(
+                        prefix + "/" + chapter.data.title! + ".srt",
+                        body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
+                    )
+            }
+            return join(promises).then { _ in
+                return chapters
+            }
+        }
+    }
     
     func toJSON<T>(items: [T], _ itemToDict: (T) -> NSMutableDictionary) throws -> String {
         let toDicts: [NSMutableDictionary] = items.map(itemToDict)

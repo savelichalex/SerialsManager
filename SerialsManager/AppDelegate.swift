@@ -36,6 +36,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 if let account = response {
                     print("Hello \(account.name.givenName)")
                 } else {
+                    let errorMirror = Mirror(reflecting: error)
+                    print(errorMirror.subjectType)
                     print(error)
                 }
             }
@@ -141,102 +143,121 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func uploadSerials(serials: [Serial]) -> Promise<[Serial]> {
-        return Promise { resolve, reject in
-            do {
-                let serialsJSON = try self.toJSON(serials) { serial in
-                    let serialDict = NSMutableDictionary()
-                    serialDict.setValue(serial.data.title, forKey: "title")
-                    serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "seasons")
-                    return serialDict
+        let serialsWithSeasons =
+            serials.filter {
+                $0.seasons != nil
+        }
+        guard serialsWithSeasons.count != 0  else {
+            return Promise(serials)
+        }
+        return firstly { () -> Promise<[Files.FolderMetadata]> in
+                // create folders first because I don't want to write JSON file
+                // if an error happen
+                let promises: [Promise<Files.FolderMetadata>] =
+                    serialsWithSeasons.map { (serial: Serial) -> Promise<Files.FolderMetadata> in
+                        return self.createFolder("/" + serial.data.title)
                 }
-                resolve(serialsJSON)
-            } catch let error {
-                reject(error)
-            }
-        }.then { (serialsJSON: String) -> Promise<Files.FileMetadata> in
-            return self.uploadFile(
-                "/serials.json",
-                body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-            )
-        }.then { _ in
-            let serialsWithSeasons =
-                serials.filter {
-                    $0.seasons != nil
+                return join(promises)
+            }.then { (_: [Files.FolderMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let serialsJSON = try self.toJSON(serials) { serial in
+                            let serialDict = NSMutableDictionary()
+                            serialDict.setValue(serial.data.title, forKey: "title")
+                            serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "seasons")
+                            return serialDict
+                        }
+                        resolve(serialsJSON)
+                    } catch let error {
+                        reject(error)
+                    }
                 }
-            let promises =
-                serialsWithSeasons.map { (serial: Serial) -> Promise<Files.FolderMetadata> in
-                    return self.createFolder("/" + serial.data.title)
-                }
-            return join(promises)
-                .then { _ in
-                    return serialsWithSeasons
-            }
+            }.then { (serialsJSON: String) -> Promise<Files.FileMetadata> in
+                return self.uploadFile(
+                    "/serials.json",
+                    body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { (_: Files.FileMetadata) -> [Serial] in
+                return serialsWithSeasons
         }
     }
     
     func uploadSeasons(seasons: [Season], prefix: String) -> Promise<[Season]> {
-        return Promise { resolve, reject in
-            do {
-                let seasonsJSON = try self.toJSON(seasons) { season in
-                    let seasonDict = NSMutableDictionary()
-                    seasonDict.setValue(season.data.title, forKey: "title")
-                    seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "chapters")
-                    return seasonDict
+        let seasonsWithChapters =
+            seasons.filter { $0.chapters != nil }
+        guard seasonsWithChapters.count != 0 else {
+            return Promise(seasons)
+        }
+        return firstly { () -> Promise<[Files.FolderMetadata]> in
+                // create folders first because I don't want to write JSON file
+                // if an error happen
+                let promises: [Promise<Files.FolderMetadata>] =
+                    seasonsWithChapters.map { (season: Season) -> Promise<Files.FolderMetadata> in
+                        let folder = prefix + "/" + season.data.title
+                        return self.createFolder(folder)
                 }
-                resolve(seasonsJSON)
-            } catch let error {
-                reject(error)
-            }
-        }.then { (seasonsJSON: String) -> Promise<Files.FileMetadata> in
-            return self.uploadFile(
-                prefix + "/chapters.json",
-                body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-            )
-        }.then { _ in
-            let seasonsWithChapters =
-                seasons.filter { $0.chapters != nil }
-            let promises =
-                seasonsWithChapters.map { (season: Season) -> Promise<Files.FolderMetadata> in
-                    let folder = prefix + "/" + season.data.title
-                    return self.createFolder(folder)
-            }
-            return join(promises)
-                .then { _ in
-                    return seasonsWithChapters
-            }
+                return join(promises)
+            }.then { (_: [Files.FolderMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let seasonsJSON = try self.toJSON(seasons) { season in
+                            let seasonDict = NSMutableDictionary()
+                            seasonDict.setValue(season.data.title, forKey: "title")
+                            seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "chapters")
+                            return seasonDict
+                        }
+                        resolve(seasonsJSON)
+                    } catch let error {
+                        reject(error)
+                    }
+                }
+            }.then { (seasonsJSON: String) -> Promise<Files.FileMetadata> in
+                return self.uploadFile(
+                    prefix + "/chapters.json",
+                    body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { _ in
+                return seasonsWithChapters
         }
     }
 
     func uploadChapters(chapters: [Chapter], prefix: String) -> Promise<[Chapter]> {
-        return Promise { resolve, reject in
-            do {
-                let chaptersJSON = try self.toJSON(chapters) { chapter in
-                    let chapterDict = NSMutableDictionary()
-                    chapterDict.setValue(chapter.data.title, forKey: "title")
-                    let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
-                    chapterDict.setValue(chapterSrtPath, forKey: "srt")
-                    return chapterDict
-                }
-                resolve(chaptersJSON)
-            } catch let error {
-                reject(error)
-            }
-        }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
-            return self.uploadFile(
-                prefix + "/chapters.json",
-                body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
-            )
-        }.then { _ in
-            let promises =
-                chapters.map { chapter in
-                    return self.uploadFile(
-                        prefix + "/" + chapter.data.title! + ".srt",
-                        body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
+        guard chapters.count != 0 else {
+            return Promise(chapters)
+        }
+        return firstly { () -> Promise<[Files.FileMetadata]> in
+                // uplaod files first because I don't want to write JSON file
+                // if an error happen
+                let promises =
+                    chapters.map { chapter in
+                        return self.uploadFile(
+                            prefix + "/" + chapter.data.title! + ".srt",
+                            body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
                     )
-            }
-            return join(promises).then { _ in
+                }
+                return join(promises)
+            }.then { (_: [Files.FileMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let chaptersJSON = try self.toJSON(chapters) { chapter in
+                            let chapterDict = NSMutableDictionary()
+                            chapterDict.setValue(chapter.data.title, forKey: "title")
+                            let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
+                            chapterDict.setValue(chapterSrtPath, forKey: "srt")
+                            return chapterDict
+                        }
+                        resolve(chaptersJSON)
+                    } catch let error {
+                        reject(error)
+                    }
+                }
+            }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
+                return self.uploadFile(
+                    prefix + "/chapters.json",
+                    body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { _ in
                 return chapters
-            }
         }
     }
     

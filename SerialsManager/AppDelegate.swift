@@ -10,6 +10,8 @@ import Cocoa
 import SwiftyDropbox
 import PromiseKit
 
+typealias EntityJSON = [String: AnyObject]
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -41,18 +43,93 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     print(error)
                 }
             }
+            
+            struct PromiseThroughState<T,V> {
+                let state: T
+                let lastResult: V
+            }
+            
+            self.downloadJSON("/serials.json")
+                .then { serials in
+                    print(serials)
+                }.error { error in
+                    print(error)
+            }
+            
+//            self.downloadJSON("/serials.json", json: serialsJSON)
+//                .then { (serials: [EntityJSON]) ->
+//                    Promise<PromiseThroughState<[EntityJSON],[[EntityJSON]]>> in
+//                let promises =
+//                    serials.map { self.downloadJSON("/" + $0.title + "/" + $0.path, json: seasonsJSON) }
+//                
+//                return join(promises)
+//                    .then { result in
+//                        return PromiseThroughState(
+//                            state: serials,
+//                            lastResult: result
+//                        )
+//                    }
+//                }.then { state in
+//                    
+//                }.error { error in
+//                let errorMirror = Mirror(reflecting: error)
+//                print(errorMirror.subjectType)
+//                print(error)
+//            }
         }
         
     }
     
+    func downloadJSON(path: String) -> Promise<[EntityJSON]> {
+        return Promise { resolve, reject in
+            guard let client = Dropbox.authorizedClient else {
+                reject(SerialsError.Unauthorized)
+                return
+            }
+            let destination : (NSURL, NSHTTPURLResponse) -> NSURL = { temporaryURL, response in
+                let fileManager = NSFileManager.defaultManager()
+                let directoryURL = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
+                // generate a unique name for this file in case we've seen it before
+                let UUID = NSUUID().UUIDString
+                let pathComponent = "\(UUID)-\(response.suggestedFilename!)"
+                return directoryURL.URLByAppendingPathComponent(pathComponent)
+            }
+            client.files.download(path: path, destination: destination)
+                .response { response, error in
+                    guard let (_, url) = response else {
+                        reject(SerialsError.DownloadError(description: error!.description))
+                        return
+                    }
+                    guard let data = NSData(contentsOfURL: url) else {
+                        reject(SerialsError.DownloadError(description: "Empty file"))
+                        return
+                    }
+                    do {
+                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as? [EntityJSON]
+                        guard json != nil else {
+                            reject(SerialsError.DownloadError(description: "Convert error"))
+                            return
+                        }
+                        resolve(json!)
+                    } catch {
+                        reject(SerialsError.NotValid)
+                    }
+            }
+        }
+    }
+    
     enum SerialsError: ErrorType, CustomStringConvertible {
+        case DownloadError(description: String)
         case UploadError(description: String)
+        case Unauthorized
         case NotValid
         case Unknown
         
         var description: String {
             switch self {
+                case .DownloadError(let description): return description
                 case .UploadError(let description): return description
+                case .Unauthorized: return "Unauthorized"
                 case .NotValid: return "JSON is not valid"
                 case .Unknown: return "Unknow error"
             }
@@ -99,6 +176,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }.then { _ in
                     print("Success")
                 }.error { error in
+                    let errorMirror = Mirror(reflecting: error)
+                    print(errorMirror.subjectType)
                     print(error)
                 }
         }
@@ -119,7 +198,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         resolve(response!)
                 }
             } else {
-                reject("Unauthorized" as! ErrorType)
+                reject(SerialsError.Unauthorized)
             }
         }
     }
@@ -137,7 +216,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         resolve(response!)
                 }
             } else {
-                reject("Unauthorized" as! ErrorType)
+                reject(SerialsError.Unauthorized)
             }
         }
     }
@@ -164,7 +243,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         let serialsJSON = try self.toJSON(serials) { serial in
                             let serialDict = NSMutableDictionary()
                             serialDict.setValue(serial.data.title, forKey: "title")
-                            serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "seasons")
+                            serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "path")
                             return serialDict
                         }
                         resolve(serialsJSON)
@@ -203,7 +282,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         let seasonsJSON = try self.toJSON(seasons) { season in
                             let seasonDict = NSMutableDictionary()
                             seasonDict.setValue(season.data.title, forKey: "title")
-                            seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "chapters")
+                            seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "path")
                             return seasonDict
                         }
                         resolve(seasonsJSON)
@@ -243,7 +322,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             let chapterDict = NSMutableDictionary()
                             chapterDict.setValue(chapter.data.title, forKey: "title")
                             let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
-                            chapterDict.setValue(chapterSrtPath, forKey: "srt")
+                            chapterDict.setValue(chapterSrtPath, forKey: "path")
                             return chapterDict
                         }
                         resolve(chaptersJSON)

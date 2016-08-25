@@ -57,32 +57,59 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self.downloadJSON("/serials.json")
                 .then { serials in
                     print(serials)
+                    let promises =
+                        serials.map {
+                            self.downloadJSON($0.path)
+                    }
+                    
+                    return join(promises)
+                        .then { seasons -> (Entities, [Entities]) in
+                            return (serials, seasons)
+                    }
+                }.then { (data: (Entities, [Entities])) in
+                    let (serials, seasons) = data
+                    let promises =
+                        seasons.reduce([], combine: +)
+                            .map {
+                                self.downloadJSON($0.path)
+                    }
+                    
+                    return join(promises)
+                        .then { chapters -> (Entities, [Entities], [Entities]) in
+                            return (serials, seasons, chapters)
+                    }
+                }.then { (data: (Entities, [Entities], [Entities])) in
+                    let (serials, seasons, chapters) = data
+                    let promises =
+                        chapters.reduce([], combine: +)
+                            .map {
+                                self.downloadData($0.path)
+                    }
+                    
+                    return join(promises)
+                        .then { data -> (Entities, [Entities], [Entities], [NSData]) in
+                            return (serials, seasons, chapters, data)
+                    }
+                }.then { (data: (Entities, [Entities], [Entities], [NSData])) in
+                    let (serials, seasons, chapters, chaptersData) = data
+                    
                 }.error { error in
                     print(error)
             }
-            
-//            self.downloadJSON("/serials.json", json: serialsJSON)
-//                .then { (serials: [EntityJSON]) ->
-//                    Promise<PromiseThroughState<[EntityJSON],[[EntityJSON]]>> in
-//                let promises =
-//                    serials.map { self.downloadJSON("/" + $0.title + "/" + $0.path, json: seasonsJSON) }
-//                
-//                return join(promises)
-//                    .then { result in
-//                        return PromiseThroughState(
-//                            state: serials,
-//                            lastResult: result
-//                        )
-//                    }
-//                }.then { state in
-//                    
-//                }.error { error in
-//                let errorMirror = Mirror(reflecting: error)
-//                print(errorMirror.subjectType)
-//                print(error)
-//            }
         }
-        
+    }
+    
+    func getSerials(serials: Entities, seasons: [Entities], chapters: [Entities], result: [Serial] = []) -> [Serial] {
+        guard serials.count != 0 else {
+            return result
+        }
+//        let newResult =
+//            result.append(
+//                Serial(
+//                    data: SerialData(
+//                        title: ))
+//        )
+        getSerials(<#T##serials: Entities##Entities#>, seasons: <#T##[Entities]#>, chapters: <#T##[Entities]#>, result: <#T##[Serial]#>)
     }
     
     func downloadJSON(path: String) -> Promise<Entities> {
@@ -123,6 +150,35 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     } catch {
                         reject(SerialsError.NotValid)
                     }
+            }
+        }
+    }
+    
+    func downloadData(path: String) -> Promise<NSData> {
+        return Promise { resolve, reject in
+            guard let client = Dropbox.authorizedClient else {
+                reject(SerialsError.Unauthorized)
+                return
+            }
+            let destination : (NSURL, NSHTTPURLResponse) -> NSURL = { temporaryURL, response in
+                let fileManager = NSFileManager.defaultManager()
+                let directoryURL = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask)[0]
+                // generate a unique name for this file in case we've seen it before
+                let UUID = NSUUID().UUIDString
+                let pathComponent = "\(UUID)-\(response.suggestedFilename!)"
+                return directoryURL.URLByAppendingPathComponent(pathComponent)
+            }
+            client.files.download(path: path, destination: destination)
+                .response { response, error in
+                    guard let (_, url) = response else {
+                        reject(SerialsError.DownloadError(description: error!.description))
+                        return
+                    }
+                    guard let data = NSData(contentsOfURL: url) else {
+                        reject(SerialsError.DownloadError(description: "Empty file"))
+                        return
+                    }
+                    resolve(data)
             }
         }
     }

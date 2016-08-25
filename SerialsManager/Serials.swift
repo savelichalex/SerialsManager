@@ -9,19 +9,14 @@
 import Foundation
 
 struct SerialData {
-    let path: NSURL
     let title: String
-    let seasonsJSON: NSURL
 }
 
 struct SeasonData {
-    let path: NSURL
     let title: String
-    let chaptersJSON: NSURL
 }
 
 struct ChapterData {
-    let path: NSURL?
     let title: String?
     let raw: String?
 }
@@ -29,12 +24,10 @@ struct ChapterData {
 class Serial {
     var data: SerialData
     var seasons: [Season]?
-    var active: Bool
     
     init(data: SerialData) {
         self.data = data
         seasons = nil
-        active = false
     }
 }
 
@@ -42,13 +35,11 @@ class Season {
     let data: SeasonData
     let serial: Serial?
     var chapters: [Chapter]?
-    var active: Bool
     
     init(data: SeasonData, serial: Serial) {
         self.data = data
         self.serial = serial
         chapters = nil
-        active = false
     }
 }
 
@@ -93,9 +84,7 @@ func getSerials(serialsPath: NSURL) -> [Serial]? {
             let serial =
                 Serial(
                     data: SerialData(
-                        path: $0,
-                        title: $0.lastPathComponent!,
-                        seasonsJSON: NSURL.fileURLWithPath(($0.path! + "/seasons.json"))))
+                        title: $0.lastPathComponent!))
             serial.seasons = getSeasons($0, serial: serial)
             return serial
         }

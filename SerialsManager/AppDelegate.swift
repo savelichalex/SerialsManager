@@ -10,7 +10,12 @@ import Cocoa
 import SwiftyDropbox
 import PromiseKit
 
-typealias EntityJSON = [String: AnyObject]
+typealias JSON = [String: AnyObject]
+struct EntityJSON {
+    let title: String
+    let path: String
+}
+typealias Entities = [EntityJSON]
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -80,7 +85,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
     }
     
-    func downloadJSON(path: String) -> Promise<[EntityJSON]> {
+    func downloadJSON(path: String) -> Promise<Entities> {
         return Promise { resolve, reject in
             guard let client = Dropbox.authorizedClient else {
                 reject(SerialsError.Unauthorized)
@@ -105,12 +110,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         return
                     }
                     do {
-                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as? [EntityJSON]
+                        let json = try NSJSONSerialization.JSONObjectWithData(data, options: NSJSONReadingOptions()) as? [JSON]
                         guard json != nil else {
                             reject(SerialsError.DownloadError(description: "Convert error"))
                             return
                         }
-                        resolve(json!)
+                        resolve(json!.map {
+                            let title = $0["title"] as! String
+                            let path = $0["path"] as! String
+                            return EntityJSON(title: title, path: path)
+                        })
                     } catch {
                         reject(SerialsError.NotValid)
                     }

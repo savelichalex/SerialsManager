@@ -100,9 +100,7 @@ func getSeasons(seasonsPath: NSURL, serial: Serial) -> [Season]? {
             let season =
                 Season(
                     data: SeasonData(
-                        path: $0,
-                        title: $0.lastPathComponent!,
-                        chaptersJSON: NSURL.fileURLWithPath(($0.path! + "/chapters.json"))
+                        title: $0.lastPathComponent!
                     ),
                     serial: serial)
             season.chapters = getChapters($0, season: season)
@@ -121,7 +119,6 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
                 let chapterText = try String(contentsOfURL: element, encoding: NSUTF8StringEncoding)
                 return Chapter(
                     data: ChapterData(
-                        path: element,
                         title: String(index + 1),
                         raw: chapterText),
                     season: season)
@@ -137,7 +134,7 @@ func getChapters(chaptersPath: NSURL, season: Season) -> [Chapter]? {
 func addNewChapter(season: Season) -> Chapter {
     let newChapter =
         Chapter(
-            data: ChapterData(path: nil, title: String((season.chapters?.count ?? 0) + 1), raw: nil),
+            data: ChapterData(title: String((season.chapters?.count ?? 0) + 1), raw: nil),
             season: season
         )
     season.chapters?.append(newChapter)
@@ -146,7 +143,6 @@ func addNewChapter(season: Season) -> Chapter {
 
 func updateChapterData(chapter: Chapter, text: String?) -> Void {
     let newData = ChapterData(
-        path: chapter.data.path,
         title: chapter.data.title,
         raw: text
     )

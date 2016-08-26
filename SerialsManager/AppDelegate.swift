@@ -15,8 +15,16 @@ struct EntityJSON {
     let title: String
     let path: String
 }
-typealias Entities = [EntityJSON]
 
+typealias Entities = [EntityJSON]
+class ListNode<T> {
+    var value: T
+    var next: ListNode? = nil
+    
+    init(value: T) {
+        self.value = value
+    }
+}
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
@@ -56,7 +64,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             self.downloadJSON("/serials.json")
                 .then { serials in
-                    print(serials)
                     let promises =
                         serials.map {
                             self.downloadJSON($0.path)
@@ -88,10 +95,38 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     
                     return join(promises)
                         .then { data -> (Entities, [Entities], [Entities], [NSData]) in
+                            print(chapters.count)
+                            print(data.count)
                             return (serials, seasons, chapters, data)
                     }
-                }.then { (data: (Entities, [Entities], [Entities], [NSData])) in
-                    let (serials, seasons, chapters, chaptersData) = data
+                }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
+                    let (serials, seasons, chapters, chaptersRawData) = data
+                    let chaptersData =
+                        chapters.enumerate().map { (index1, arr) in
+                            arr.enumerate().map { (index2, data) in
+                                ChapterData(
+                                    title: data.title,
+                                    raw: String(
+                                        data: chaptersRawData[index1 + index2],
+                                        encoding: NSUTF8StringEncoding
+                                    )
+                                )
+                            }
+                    }
+                    var index = 0
+                    let newChaptersData =
+                        seasons.map { (season: Entities) -> [[ChapterData]] in
+                            let slice = chaptersData[index..<season.count]
+                            index = index + season.count
+                            var newArr = Array<[ChapterData]>()
+                            for el in slice {
+                                newArr.append(el)
+                            }
+                            return newArr
+                    }
+                    return (serials, seasons, newChaptersData)
+                }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> Void in
+                    let (serials, seasons, chapters) = data
                     
                 }.error { error in
                     print(error)
@@ -99,17 +134,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func getSerials(serials: Entities, seasons: [Entities], chapters: [Entities], result: [Serial] = []) -> [Serial] {
-        guard serials.count != 0 else {
+    func getSerials(serials: ListNode<EntityJSON>?, seasons: ListNode<Entities>?, chapters: ListNode<Entities>?, result: [Serial] = []) -> [Serial] {
+        guard let serial = serials else {
             return result
         }
 //        let newResult =
 //            result.append(
 //                Serial(
 //                    data: SerialData(
-//                        title: ))
+//                    title: ))
 //        )
-        getSerials(<#T##serials: Entities##Entities#>, seasons: <#T##[Entities]#>, chapters: <#T##[Entities]#>, result: <#T##[Serial]#>)
+//        return getSerials
+        return []
+    }
+    
+    func getSerials(serials: Entities, seasons: [Entities], chapters: [Entities]) -> [Serial] {
+        return []
     }
     
     func downloadJSON(path: String) -> Promise<Entities> {
@@ -357,7 +397,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }.then { (seasonsJSON: String) -> Promise<Files.FileMetadata> in
                 return self.uploadFile(
-                    prefix + "/chapters.json",
+                    prefix + "/seasons.json",
                     body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
                 )
             }.then { _ in

@@ -10,18 +10,13 @@ import Cocoa
 
 class SerialsViewController: NSViewController {
     
-    let dbPath = NSURL.fileURLWithPath("/Users/admin/friends-db")
-    
-    var serials: [Serial]?
+    var serials: [Serial]? {
+        didSet{
+            outlineView.reloadData()
+        }
+    }
     
     @IBOutlet weak var outlineView: NSOutlineView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        serials = getSerials(dbPath)
-        // Do any additional setup after loading the view.
-    }
     
     @IBAction func clickOnCell(sender: NSOutlineView) {
         let item = sender.itemAtRow(sender.clickedRow)
@@ -86,7 +81,7 @@ extension SerialsViewController: NSOutlineViewDataSource {
             return 0
         }
         
-        return serials!.count
+        return serials?.count ?? 0
     }
     
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {

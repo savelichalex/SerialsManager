@@ -21,7 +21,7 @@ class ListNode<T> {
     var value: T
     var next: ListNode? = nil
     
-    init(value: T) {
+    init(_ value: T) {
         self.value = value
     }
 }
@@ -95,8 +95,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     
                     return join(promises)
                         .then { data -> (Entities, [Entities], [Entities], [NSData]) in
-                            print(chapters.count)
-                            print(data.count)
                             return (serials, seasons, chapters, data)
                     }
                 }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
@@ -125,31 +123,132 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             return newArr
                     }
                     return (serials, seasons, newChaptersData)
-                }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> Void in
+                }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> [Serial] in
                     let (serials, seasons, chapters) = data
-                    
+                    print(chapters.count)
+                    print(chapters.first?.count)
+                    print(chapters.first?.first?.count)
+                    return self.getSerials(serials, seasons, chapters)
+                }.then { serials -> Void in
+                    print(serials)
+                    print(serials.first?.seasons?.count)
+                    print(serials[0].seasons?[0].chapters?.count)
+                    print(serials[0].seasons?[1].chapters?.count)
+                    print(serials[0].seasons?[2].chapters?.count)
+                    if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
+                        vc.serials = serials
+                    }
                 }.error { error in
                     print(error)
             }
         }
     }
     
-    func getSerials(serials: ListNode<EntityJSON>?, seasons: ListNode<Entities>?, chapters: ListNode<Entities>?, result: [Serial] = []) -> [Serial] {
-        guard let serial = serials else {
-            return result
+    func arrayToList<T>(arr: [T]) -> ListNode<T> {
+        var root: ListNode<T>? = nil
+        var prev: ListNode<T>? = nil
+        for el in arr {
+            guard root != nil else {
+                root = ListNode(el)
+                prev = root!
+                continue
+            }
+            let newNode = ListNode(el)
+            prev!.next = newNode
+            prev = newNode
         }
-//        let newResult =
-//            result.append(
-//                Serial(
-//                    data: SerialData(
-//                    title: ))
-//        )
-//        return getSerials
-        return []
+        return root!
     }
     
-    func getSerials(serials: Entities, seasons: [Entities], chapters: [Entities]) -> [Serial] {
-        return []
+    func getSerials(serials: ListNode<EntityJSON>?, _ seasons: ListNode<Entities>?, _ chapters: ListNode<[[ChapterData]]>?, _ result: NSMutableArray = NSMutableArray()) -> [Serial] {
+        guard let serial = serials,
+              let season = seasons,
+              let chapter = chapters else {
+            return result.flatMap {
+                $0 as? Serial
+            }
+        }
+        let newSerial =
+            Serial(
+                data: SerialData(
+                    title: serial.value.title
+                ))
+        newSerial.seasons = getSeasons(
+            season.value,
+            chapter.value,
+            newSerial)
+        result.addObject(
+            newSerial
+        )
+        return getSerials(
+            serial.next,
+            season.next,
+            chapter.next,
+            result)
+    }
+    
+    func getSerials(serials: Entities, _ seasons: [Entities], _ chapters: [[[ChapterData]]]) -> [Serial] {
+        return getSerials(
+            arrayToList(serials),
+            arrayToList(seasons),
+            arrayToList(chapters)
+        )
+    }
+    
+    func getSeasons(seasons: ListNode<EntityJSON>?, _ chapters: ListNode<[ChapterData]>?, _ serial: Serial, _ result: NSMutableArray = NSMutableArray()) -> [Season] {
+        guard let season = seasons,
+              let chapter = chapters else {
+            return result.flatMap {
+                $0 as? Season
+            }
+        }
+        let newSeason =
+            Season(
+                data: SeasonData(
+                    title: season.value.title
+                ),
+                serial: serial
+        )
+        newSeason.chapters = getChapters(
+            chapter.value,
+            newSeason
+        )
+        result.addObject(newSeason)
+        return getSeasons(
+            season.next,
+            chapter.next,
+            serial,
+            result
+        )
+    }
+    
+    func getSeasons(seasons: Entities, _ chapters: [[ChapterData]], _ serial: Serial) -> [Season] {
+        return getSeasons(
+            arrayToList(seasons),
+            arrayToList(chapters),
+            serial)
+    }
+    
+    func getChapters(chapters: ListNode<ChapterData>?, _ season: Season, _ result: NSMutableArray = NSMutableArray()) -> [Chapter] {
+        guard let chapter = chapters else {
+            return result.flatMap {
+                $0 as? Chapter
+            }
+        }
+        let newChapter =
+            Chapter(data: chapter.value, season: season)
+        result.addObject(newChapter)
+        return getChapters(
+            chapter.next,
+            season,
+            result
+        )
+    }
+    
+    func getChapters(chapters: [ChapterData], _ season: Season) -> [Chapter] {
+        return getChapters(
+            arrayToList(chapters),
+            season)
     }
     
     func downloadJSON(path: String) -> Promise<Entities> {

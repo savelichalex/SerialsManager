@@ -586,6 +586,32 @@
             </objects>
             <point key="canvasLocation" x="75" y="250"/>
         </scene>
+        <!--View Controller-->
+        <scene sceneID="QaX-q7-sCI">
+            <objects>
+                <viewController storyboardIdentifier="LoadingSheet" id="rB8-yB-0Jt" sceneMemberID="viewController">
+                    <view key="view" id="YgS-sG-lQ6">
+                        <rect key="frame" x="0.0" y="0.0" width="314" height="121"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5AE-v5-mdB">
+                                <rect key="frame" x="94" y="73" width="126" height="17"/>
+                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Loading serials data" id="CEr-ce-vyM">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
+                            <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" indeterminate="YES" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="Cgk-ho-WTj">
+                                <rect key="frame" x="75" y="28" width="164" height="20"/>
+                            </progressIndicator>
+                        </subviews>
+                    </view>
+                </viewController>
+                <customObject id="Z1o-HO-9hg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="75" y="522.5"/>
+        </scene>
         <!--Split View Controller-->
         <scene sceneID="g0a-Ml-cjQ">
             <objects>

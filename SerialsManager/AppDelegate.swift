@@ -28,8 +28,10 @@ class ListNode<T> {
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-
-
+    lazy var loadingSheet: NSViewController = {
+        return NSApplication.sharedApplication().keyWindow!.contentViewController!.storyboard!.instantiateControllerWithIdentifier("LoadingSheet") as! NSViewController
+    }()
+    
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         // Insert code here to initialize your application
         if let path = NSBundle.mainBundle().pathForResource("AppConfig", ofType: "plist") {
@@ -57,10 +59,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
             
-            struct PromiseThroughState<T,V> {
-                let state: T
-                let lastResult: V
-            }
+//            if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
+//                vc.presentViewControllerAsSheet(loadingSheet)
+//            } else {
+//                print("sdfsdf")
+//            }
             
             self.downloadJSON("/serials.json")
                 .then { serials in
@@ -125,18 +128,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     return (serials, seasons, newChaptersData)
                 }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> [Serial] in
                     let (serials, seasons, chapters) = data
-                    print(chapters.count)
-                    print(chapters.first?.count)
-                    print(chapters.first?.first?.count)
                     return self.getSerials(serials, seasons, chapters)
                 }.then { serials -> Void in
-                    print(serials)
-                    print(serials.first?.seasons?.count)
-                    print(serials[0].seasons?[0].chapters?.count)
-                    print(serials[0].seasons?[1].chapters?.count)
-                    print(serials[0].seasons?[2].chapters?.count)
                     if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
                         vc.serials = serials
+//                        vc.dismissController(self.loadingSheet)
                     }
                 }.error { error in
                     print(error)
@@ -345,7 +341,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func saveAll(sender: NSMenuItem) {
-        if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
+        guard let currentWindow = NSApplication.sharedApplication().keyWindow else {
+            return
+        }
+        if let vc = currentWindow.contentViewController?.childViewControllers[0] as? SerialsViewController {
+            vc.presentViewControllerAsSheet(loadingSheet)
             let serials = vc.getCurrentSerials()
             guard (serials != nil) else {
                 print("No one serial found")
@@ -377,8 +377,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                     
                     return join(promises)
-                }.then { _ in
+                }.then { _ -> Void in
                     print("Success")
+                    vc.dismissController(self.loadingSheet)
                 }.error { error in
                     let errorMirror = Mirror(reflecting: error)
                     print(errorMirror.subjectType)

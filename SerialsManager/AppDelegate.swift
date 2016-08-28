@@ -29,7 +29,7 @@ class ListNode<T> {
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     lazy var loadingSheet: NSViewController = {
-        return NSApplication.sharedApplication().keyWindow!.contentViewController!.storyboard!.instantiateControllerWithIdentifier("LoadingSheet") as! NSViewController
+        return NSApplication.sharedApplication().windows.first!.contentViewController!.storyboard!.instantiateControllerWithIdentifier("LoadingSheet") as! NSViewController
     }()
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
@@ -39,6 +39,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             let dropboxAppKey = appConfig!["DropboxAppKey"] as! String
             let dropboxAccessToken = appConfig!["DropboxOAuthAccessToken"] as! String
+            
+            if let vc = NSApplication.sharedApplication().windows.first?.contentViewController?.childViewControllers[0] as? SerialsViewController {
+                vc.presentViewControllerAsSheet(loadingSheet)
+            }
             
             Dropbox.setupWithAppKey(dropboxAppKey)
             let client =
@@ -58,12 +62,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     print(error)
                 }
             }
-            
-//            if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
-//                vc.presentViewControllerAsSheet(loadingSheet)
-//            } else {
-//                print("sdfsdf")
-//            }
             
             self.downloadJSON("/serials.json")
                 .then { serials in
@@ -130,9 +128,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let (serials, seasons, chapters) = data
                     return self.getSerials(serials, seasons, chapters)
                 }.then { serials -> Void in
-                    if let vc = NSApplication.sharedApplication().keyWindow?.contentViewController?.childViewControllers[0] as? SerialsViewController {
+                    if let vc = NSApplication.sharedApplication().windows.first?.contentViewController?.childViewControllers[0] as? SerialsViewController {
                         vc.serials = serials
-//                        vc.dismissController(self.loadingSheet)
+                        vc.dismissViewController(self.loadingSheet)
                     }
                 }.error { error in
                     print(error)

@@ -586,10 +586,10 @@
             </objects>
             <point key="canvasLocation" x="75" y="250"/>
         </scene>
-        <!--View Controller-->
+        <!--Loading Sheet View Controller-->
         <scene sceneID="QaX-q7-sCI">
             <objects>
-                <viewController storyboardIdentifier="LoadingSheet" id="rB8-yB-0Jt" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LoadingSheet" id="rB8-yB-0Jt" customClass="LoadingSheetViewController" customModule="SerialsManager" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="YgS-sG-lQ6">
                         <rect key="frame" x="0.0" y="0.0" width="314" height="121"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -607,6 +607,9 @@
                             </progressIndicator>
                         </subviews>
                     </view>
+                    <connections>
+                        <outlet property="sheetTitle" destination="5AE-v5-mdB" id="hgL-eu-Ke7"/>
+                    </connections>
                 </viewController>
                 <customObject id="Z1o-HO-9hg" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>

@@ -27,9 +27,16 @@ class ListNode<T> {
 }
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
+    
+    lazy var serialsVC: SerialsViewController? = {
+        guard let vc = NSApplication.sharedApplication().windows.first?.contentViewController?.childViewControllers[0] as? SerialsViewController else {
+            return nil
+        }
+        return vc
+    }()
 
-    lazy var loadingSheet: NSViewController = {
-        return NSApplication.sharedApplication().windows.first!.contentViewController!.storyboard!.instantiateControllerWithIdentifier("LoadingSheet") as! NSViewController
+    lazy var loadingSheet: LoadingSheetViewController = {
+        return NSApplication.sharedApplication().windows.first!.contentViewController!.storyboard!.instantiateControllerWithIdentifier("LoadingSheet") as! LoadingSheetViewController
     }()
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
@@ -40,9 +47,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let dropboxAppKey = appConfig!["DropboxAppKey"] as! String
             let dropboxAccessToken = appConfig!["DropboxOAuthAccessToken"] as! String
             
-            if let vc = NSApplication.sharedApplication().windows.first?.contentViewController?.childViewControllers[0] as? SerialsViewController {
-                vc.presentViewControllerAsSheet(loadingSheet)
-            }
+            serialsVC?.presentViewControllerAsSheet(loadingSheet)
+            loadingSheet.prepareForDownload()
             
             Dropbox.setupWithAppKey(dropboxAppKey)
             let client =
@@ -128,10 +134,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     let (serials, seasons, chapters) = data
                     return self.getSerials(serials, seasons, chapters)
                 }.then { serials -> Void in
-                    if let vc = NSApplication.sharedApplication().windows.first?.contentViewController?.childViewControllers[0] as? SerialsViewController {
-                        vc.serials = serials
-                        vc.dismissViewController(self.loadingSheet)
-                    }
+                    self.serialsVC?.serials = serials
+                    self.serialsVC?.dismissViewController(self.loadingSheet)
                 }.error { error in
                     print(error)
             }
@@ -339,50 +343,45 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func saveAll(sender: NSMenuItem) {
-        guard let currentWindow = NSApplication.sharedApplication().keyWindow else {
+        guard let serials = serialsVC?.getCurrentSerials() else {
+            print("No one serial found")
             return
         }
-        if let vc = currentWindow.contentViewController?.childViewControllers[0] as? SerialsViewController {
-            vc.presentViewControllerAsSheet(loadingSheet)
-            let serials = vc.getCurrentSerials()
-            guard (serials != nil) else {
-                print("No one serial found")
-                return
+        serialsVC?.presentViewControllerAsSheet(loadingSheet)
+        loadingSheet.preparedForUpload()
+        typealias Seasons = [Season];
+        typealias Chapters = [Chapter];
+        uploadSerials(serials)
+            .then { (serials: [Serial]) -> Promise<[Seasons]> in
+                let promises =
+                    serials.map { serial in
+                        return self.uploadSeasons(
+                            serial.seasons!,
+                            prefix: "/" + serial.data.title
+                        )
+                }
+                
+                return join(promises)
             }
-            typealias Seasons = [Season];
-            typealias Chapters = [Chapter];
-            uploadSerials(serials!)
-                .then { (serials: [Serial]) -> Promise<[Seasons]> in
-                    let promises =
-                        serials.map { serial in
-                            return self.uploadSeasons(
-                                serial.seasons!,
-                                prefix: "/" + serial.data.title
-                            )
-                        }
-                    
-                    return join(promises)
+            .then { (seasons: [Seasons]) -> Seasons in
+                return seasons.reduce([], combine: +)
+            }.then { (seasons: Seasons) -> Promise<[Chapters]> in
+                let promises =
+                    seasons.map { season in
+                        return self.uploadChapters(
+                            season.chapters!,
+                            prefix: "/" + season.serial!.data.title + "/" + season.data.title
+                        )
                 }
-                .then { (seasons: [Seasons]) -> Seasons in
-                    return seasons.reduce([], combine: +)
-                }.then { (seasons: Seasons) -> Promise<[Chapters]> in
-                    let promises =
-                        seasons.map { season in
-                            return self.uploadChapters(
-                                season.chapters!,
-                                prefix: "/" + season.serial!.data.title + "/" + season.data.title
-                            )
-                    }
-                    
-                    return join(promises)
-                }.then { _ -> Void in
-                    print("Success")
-                    vc.dismissController(self.loadingSheet)
-                }.error { error in
-                    let errorMirror = Mirror(reflecting: error)
-                    print(errorMirror.subjectType)
-                    print(error)
-                }
+                
+                return join(promises)
+            }.then { _ -> Void in
+                print("Success")
+                self.serialsVC?.dismissViewController(self.loadingSheet)
+            }.error { error in
+                let errorMirror = Mirror(reflecting: error)
+                print(errorMirror.subjectType)
+                print(error)
         }
     }
     

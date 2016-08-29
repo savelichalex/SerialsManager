@@ -106,17 +106,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     }
                 }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
                     let (serials, seasons, chapters, chaptersRawData) = data
-                    let chaptersData =
-                        chapters.enumerate().map { (index1, arr) in
-                            arr.enumerate().map { (index2, data) in
-                                ChapterData(
-                                    title: data.title,
-                                    raw: String(
-                                        data: chaptersRawData[index1 + index2],
-                                        encoding: NSUTF8StringEncoding
-                                    )
-                                )
-                            }
+                    let (_, chaptersData) =
+                        chapters.reduce((0, [])) { (acc: (Int, [[ChapterData]]), arr: [EntityJSON]) -> (Int,[[ChapterData]]) in
+                            let (index1, result) = acc
+                            return (
+                                index1 + arr.count,
+                                result + [
+                                    arr.enumerate().map { (index2: Int, data: EntityJSON) -> ChapterData in
+                                        return ChapterData(
+                                            title: data.title,
+                                            raw: String(
+                                                data: chaptersRawData[acc.0 + index2],
+                                                encoding: NSUTF8StringEncoding
+                                            )
+                                        )
+                                    }
+                                ]
+                            )
                     }
                     var index = 0
                     let newChaptersData =

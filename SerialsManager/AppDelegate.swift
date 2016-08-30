@@ -47,8 +47,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let dropboxAppKey = appConfig!["DropboxAppKey"] as! String
             let dropboxAccessToken = appConfig!["DropboxOAuthAccessToken"] as! String
             
-            serialsVC?.presentViewControllerAsSheet(loadingSheet)
-            loadingSheet.prepareForDownload()
+            if let sVC = serialsVC {
+                sVC.presentViewControllerAsSheet(loadingSheet)
+                loadingSheet.prepareForDownload(sVC)
+            }
             
             Dropbox.setupWithAppKey(dropboxAppKey)
             let client =
@@ -143,7 +145,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     self.serialsVC?.serials = serials
                     self.serialsVC?.dismissViewController(self.loadingSheet)
                 }.error { error in
-                    print(error)
+                    guard let err = error as? SerialsError else {
+                        let err = error as NSError
+                        self.loadingSheet.prepareForError(err.localizedDescription)
+                        return
+                    }
+                    self.loadingSheet.prepareForError(err.description)
             }
         }
     }
@@ -353,8 +360,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             print("No one serial found")
             return
         }
-        serialsVC?.presentViewControllerAsSheet(loadingSheet)
-        loadingSheet.preparedForUpload()
+        if let sVC = serialsVC {
+            sVC.presentViewControllerAsSheet(loadingSheet)
+            loadingSheet.prepareForDownload(sVC)
+        }
         typealias Seasons = [Season];
         typealias Chapters = [Chapter];
         uploadSerials(serials)
@@ -385,9 +394,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 print("Success")
                 self.serialsVC?.dismissViewController(self.loadingSheet)
             }.error { error in
-                let errorMirror = Mirror(reflecting: error)
-                print(errorMirror.subjectType)
-                print(error)
+                guard let err = error as? SerialsError else {
+                    let err = error as NSError
+                    self.loadingSheet.prepareForError(err.localizedDescription)
+                    return
+                }
+                self.loadingSheet.prepareForError(err.description)
         }
     }
     

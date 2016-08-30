@@ -595,7 +595,7 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5AE-v5-mdB">
-                                <rect key="frame" x="94" y="73" width="126" height="17"/>
+                                <rect key="frame" x="94" y="84" width="126" height="17"/>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Loading serials data" id="CEr-ce-vyM">
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
@@ -603,11 +603,35 @@
                                 </textFieldCell>
                             </textField>
                             <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" indeterminate="YES" style="bar" translatesAutoresizingMaskIntoConstraints="NO" id="Cgk-ho-WTj">
-                                <rect key="frame" x="75" y="28" width="164" height="20"/>
+                                <rect key="frame" x="75" y="39" width="164" height="20"/>
                             </progressIndicator>
+                            <button hidden="YES" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="00N-BK-T1X">
+                                <rect key="frame" x="120" y="4" width="75" height="32"/>
+                                <buttonCell key="cell" type="push" title="Close" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="ehN-re-lYF">
+                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                    <font key="font" metaFont="system"/>
+                                    <string key="keyEquivalent" base64-UTF8="YES">
+DQ
+</string>
+                                </buttonCell>
+                                <connections>
+                                    <action selector="closeSheetAction:" target="rB8-yB-0Jt" id="WkQ-du-e0I"/>
+                                </connections>
+                            </button>
+                            <textField hidden="YES" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4m1-ev-xJ2">
+                                <rect key="frame" x="111" y="63" width="92" height="11"/>
+                                <textFieldCell key="cell" sendsActionOnEndEditing="YES" title="Multiline Label" id="7Ax-XU-kGU">
+                                    <font key="font" metaFont="system"/>
+                                    <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                                    <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                                </textFieldCell>
+                            </textField>
                         </subviews>
                     </view>
                     <connections>
+                        <outlet property="closeSheet" destination="00N-BK-T1X" id="7pc-mZ-6zz"/>
+                        <outlet property="progressbar" destination="Cgk-ho-WTj" id="Iod-vf-Xl1"/>
+                        <outlet property="sheetDescription" destination="4m1-ev-xJ2" id="gbG-v8-u9m"/>
                         <outlet property="sheetTitle" destination="5AE-v5-mdB" id="hgL-eu-Ke7"/>
                     </connections>
                 </viewController>

@@ -12,23 +12,52 @@ class LoadingSheetViewController: NSViewController {
     
     @IBOutlet weak var sheetTitle: NSTextField?
     
+    @IBOutlet weak var closeSheet: NSButton?
+    
+    @IBOutlet weak var sheetDescription: NSTextField?
+    @IBOutlet weak var progressbar: NSProgressIndicator?
+    
+    weak var outterVC: NSViewController? = nil
+    
     let downloadText = "Loading serials data"
     let uploadText = "Save serials data"
     let errorText = "Oops, something happens"
     
-    func prepareForDownload() -> LoadingSheetViewController {
+    @IBAction func closeSheetAction(sender: NSButton) {
+        outterVC?.dismissViewController(self)
+        outterVC = nil
+    }
+    
+    func prepareForDownload(vc: NSViewController) -> LoadingSheetViewController {
+        outterVC = vc
         sheetTitle?.stringValue = downloadText
+        sheetDescription?.hidden = true
+        progressbar?.hidden = false
+        closeSheet?.hidden = true
         return self
     }
     
-    func preparedForUpload() -> LoadingSheetViewController {
+    func preparedForUpload(vc: NSViewController) -> LoadingSheetViewController {
+        outterVC = vc
         sheetTitle?.stringValue = uploadText
+        sheetDescription?.hidden = true
+        progressbar?.hidden = false
+        closeSheet?.hidden = true
         return self
     }
     
-    func prepareForError() -> LoadingSheetViewController {
+    func prepareForError(description: String) -> LoadingSheetViewController {
         sheetTitle?.stringValue = errorText
+        sheetDescription?.stringValue = description
+        sheetDescription?.hidden = false
+        progressbar?.hidden = true
+        closeSheet?.hidden = false
         return self
+    }
+    
+    func prepareForError(vc: NSViewController, description: String) -> LoadingSheetViewController {
+        outterVC = vc
+        return prepareForError(description)
     }
 }
 

@@ -41,117 +41,114 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         // Insert code here to initialize your application
-        if let path = NSBundle.mainBundle().pathForResource("AppConfig", ofType: "plist") {
-            let appConfig = NSDictionary(contentsOfFile: path)
-            
-            let dropboxAppKey = appConfig!["DropboxAppKey"] as! String
-            let dropboxAccessToken = appConfig!["DropboxOAuthAccessToken"] as! String
-            
-            if let sVC = serialsVC {
-                sVC.presentViewControllerAsSheet(loadingSheet)
-                loadingSheet.prepareForDownload(sVC)
+        guard let appKey = SecretConfig.DropboxAppKey,
+            let accessToken = SecretConfig.DropboxOAuthAccessToken else {
+                return
+        }
+        if let sVC = serialsVC {
+            sVC.presentViewControllerAsSheet(loadingSheet)
+            loadingSheet.prepareForDownload(sVC)
+        }
+        
+        Dropbox.setupWithAppKey(appKey)
+        let client =
+            DropboxClient(
+                accessToken: DropboxAccessToken(
+                    accessToken: accessToken,
+                    uid: "")
+        )
+        Dropbox.authorizedClient = client
+        DropboxClient.sharedClient = client
+        client.users.getCurrentAccount().response { response, error in
+            if let account = response {
+                print("Hello \(account.name.givenName)")
+            } else {
+                let errorMirror = Mirror(reflecting: error)
+                print(errorMirror.subjectType)
+                print(error)
             }
-            
-            Dropbox.setupWithAppKey(dropboxAppKey)
-            let client =
-                DropboxClient(
-                    accessToken: DropboxAccessToken(
-                        accessToken: dropboxAccessToken,
-                        uid: "")
-                )
-            Dropbox.authorizedClient = client
-            DropboxClient.sharedClient = client
-            client.users.getCurrentAccount().response { response, error in
-                if let account = response {
-                    print("Hello \(account.name.givenName)")
-                } else {
-                    let errorMirror = Mirror(reflecting: error)
-                    print(errorMirror.subjectType)
-                    print(error)
+        }
+        
+        self.downloadJSON("/serials.json")
+            .then { serials in
+                let promises =
+                    serials.map {
+                        self.downloadJSON($0.path)
                 }
-            }
-            
-            self.downloadJSON("/serials.json")
-                .then { serials in
-                    let promises =
-                        serials.map {
+                
+                return join(promises)
+                    .then { seasons -> (Entities, [Entities]) in
+                        return (serials, seasons)
+                }
+            }.then { (data: (Entities, [Entities])) in
+                let (serials, seasons) = data
+                let promises =
+                    seasons.reduce([], combine: +)
+                        .map {
                             self.downloadJSON($0.path)
-                    }
-                    
-                    return join(promises)
-                        .then { seasons -> (Entities, [Entities]) in
-                            return (serials, seasons)
-                    }
-                }.then { (data: (Entities, [Entities])) in
-                    let (serials, seasons) = data
-                    let promises =
-                        seasons.reduce([], combine: +)
-                            .map {
-                                self.downloadJSON($0.path)
-                    }
-                    
-                    return join(promises)
-                        .then { chapters -> (Entities, [Entities], [Entities]) in
-                            return (serials, seasons, chapters)
-                    }
-                }.then { (data: (Entities, [Entities], [Entities])) in
-                    let (serials, seasons, chapters) = data
-                    let promises =
-                        chapters.reduce([], combine: +)
-                            .map {
-                                self.downloadData($0.path)
-                    }
-                    
-                    return join(promises)
-                        .then { data -> (Entities, [Entities], [Entities], [NSData]) in
-                            return (serials, seasons, chapters, data)
-                    }
-                }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
-                    let (serials, seasons, chapters, chaptersRawData) = data
-                    let (_, chaptersData) =
-                        chapters.reduce((0, [])) { (acc: (Int, [[ChapterData]]), arr: [EntityJSON]) -> (Int,[[ChapterData]]) in
-                            let (index1, result) = acc
-                            return (
-                                index1 + arr.count,
-                                result + [
-                                    arr.enumerate().map { (index2: Int, data: EntityJSON) -> ChapterData in
-                                        return ChapterData(
-                                            title: data.title,
-                                            raw: String(
-                                                data: chaptersRawData[acc.0 + index2],
-                                                encoding: NSUTF8StringEncoding
-                                            )
+                }
+                
+                return join(promises)
+                    .then { chapters -> (Entities, [Entities], [Entities]) in
+                        return (serials, seasons, chapters)
+                }
+            }.then { (data: (Entities, [Entities], [Entities])) in
+                let (serials, seasons, chapters) = data
+                let promises =
+                    chapters.reduce([], combine: +)
+                        .map {
+                            self.downloadData($0.path)
+                }
+                
+                return join(promises)
+                    .then { data -> (Entities, [Entities], [Entities], [NSData]) in
+                        return (serials, seasons, chapters, data)
+                }
+            }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
+                let (serials, seasons, chapters, chaptersRawData) = data
+                let (_, chaptersData) =
+                    chapters.reduce((0, [])) { (acc: (Int, [[ChapterData]]), arr: [EntityJSON]) -> (Int,[[ChapterData]]) in
+                        let (index1, result) = acc
+                        return (
+                            index1 + arr.count,
+                            result + [
+                                arr.enumerate().map { (index2: Int, data: EntityJSON) -> ChapterData in
+                                    return ChapterData(
+                                        title: data.title,
+                                        raw: String(
+                                            data: chaptersRawData[acc.0 + index2],
+                                            encoding: NSUTF8StringEncoding
                                         )
-                                    }
-                                ]
-                            )
-                    }
-                    var index = 0
-                    let newChaptersData =
-                        seasons.map { (season: Entities) -> [[ChapterData]] in
-                            let slice = chaptersData[index..<season.count]
-                            index = index + season.count
-                            var newArr = Array<[ChapterData]>()
-                            for el in slice {
-                                newArr.append(el)
-                            }
-                            return newArr
-                    }
-                    return (serials, seasons, newChaptersData)
-                }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> [Serial] in
-                    let (serials, seasons, chapters) = data
-                    return self.getSerials(serials, seasons, chapters)
-                }.then { serials -> Void in
-                    self.serialsVC?.serials = serials
-                    self.serialsVC?.dismissViewController(self.loadingSheet)
-                }.error { error in
-                    guard let err = error as? SerialsError else {
-                        let err = error as NSError
-                        self.loadingSheet.prepareForError(err.localizedDescription)
-                        return
-                    }
-                    self.loadingSheet.prepareForError(err.description)
-            }
+                                    )
+                                }
+                            ]
+                        )
+                }
+                var index = 0
+                let newChaptersData =
+                    seasons.map { (season: Entities) -> [[ChapterData]] in
+                        let slice = chaptersData[index..<season.count]
+                        index = index + season.count
+                        var newArr = Array<[ChapterData]>()
+                        for el in slice {
+                            newArr.append(el)
+                        }
+                        return newArr
+                }
+                return (serials, seasons, newChaptersData)
+            }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> [Serial] in
+                let (serials, seasons, chapters) = data
+                return self.getSerials(serials, seasons, chapters)
+            }.then { serials -> Void in
+                self.serialsVC?.serials = serials
+                self.serialsVC?.dismissViewController(self.loadingSheet)
+            }.error { error in
+                guard let err = error as? SerialsError else {
+                    let err = error as NSError
+                    self.loadingSheet.prepareForError(err.localizedDescription)
+                    return
+                }
+                self.loadingSheet.prepareForError(err.description)
         }
     }
     

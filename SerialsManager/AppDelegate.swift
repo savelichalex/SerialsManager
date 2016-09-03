@@ -46,15 +46,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
         Dropbox.authorizedClient = client
         DropboxClient.sharedClient = client
-        client.users.getCurrentAccount().response { response, error in
-            if let account = response {
-                print("Hello \(account.name.givenName)")
-            } else {
-                let errorMirror = Mirror(reflecting: error)
-                print(errorMirror.subjectType)
-                print(error)
-            }
-        }
         
         serialsService.getSerials().then { serials -> Void in
                 self.serialsVC?.serials = serials

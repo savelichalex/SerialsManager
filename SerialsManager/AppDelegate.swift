@@ -11,12 +11,6 @@ import SwiftyDropbox
 import PromiseKit
 
 typealias JSON = [String: AnyObject]
-struct EntityJSON {
-    let title: String
-    let path: String
-}
-
-typealias Entities = [EntityJSON]
 class ListNode<T> {
     var value: T
     var next: ListNode? = nil

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4AE5B06E316A1176A11BC77E /* Pods_SerialsManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06904BF05179C14EA0F573D1 /* Pods_SerialsManager.framework */; };
+		8421FFD81D7ACC4000DC2CA3 /* RemoteDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8421FFD71D7ACC4000DC2CA3 /* RemoteDB.swift */; };
 		842D06511D60DE610077E766 /* AppConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 842D06501D60DE610077E766 /* AppConfig.plist */; };
 		8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721D1D2A6F4300C08568 /* AppDelegate.swift */; };
 		843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430721F1D2A6F4300C08568 /* SerialsViewController.swift */; };
@@ -24,6 +25,7 @@
 		06904BF05179C14EA0F573D1 /* Pods_SerialsManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SerialsManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A5E237592A9EDABCA615799 /* Pods-SerialsManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SerialsManager.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SerialsManager/Pods-SerialsManager.debug.xcconfig"; sourceTree = "<group>"; };
 		71CBF9B5B8108202D74EF33C /* Pods-SerialsManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SerialsManager.release.xcconfig"; path = "Pods/Target Support Files/Pods-SerialsManager/Pods-SerialsManager.release.xcconfig"; sourceTree = "<group>"; };
+		8421FFD71D7ACC4000DC2CA3 /* RemoteDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDB.swift; sourceTree = "<group>"; };
 		842D06501D60DE610077E766 /* AppConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppConfig.plist; sourceTree = "<group>"; };
 		8430721A1D2A6F4200C08568 /* SerialsManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SerialsManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8430721D1D2A6F4300C08568 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -58,6 +60,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		8421FFD61D7ACB7200DC2CA3 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8421FFD71D7ACC4000DC2CA3 /* RemoteDB.swift */,
+			);
+			name = Services;
+			sourceTree = "<group>";
+		};
 		843072111D2A6F4200C08568 = {
 			isa = PBXGroup;
 			children = (
@@ -79,6 +89,7 @@
 		8430721C1D2A6F4200C08568 /* SerialsManager */ = {
 			isa = PBXGroup;
 			children = (
+				8421FFD61D7ACB7200DC2CA3 /* Services */,
 				845131EC1D76FFFA00B76B1E /* SecretConfig.swift */,
 				845131F11D773A8A00B76B1E /* config.yml.sample */,
 				842D06501D60DE610077E766 /* AppConfig.plist */,
@@ -254,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8421FFD81D7ACC4000DC2CA3 /* RemoteDB.swift in Sources */,
 				843072201D2A6F4300C08568 /* SerialsViewController.swift in Sources */,
 				84E1828D1D524403003A6FB6 /* ChapterDetailsViewController.swift in Sources */,
 				8430721E1D2A6F4300C08568 /* AppDelegate.swift in Sources */,

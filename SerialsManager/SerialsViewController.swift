@@ -65,45 +65,29 @@ class SerialsViewController: NSViewController {
 extension SerialsViewController: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
-        if let i = item as? Serial {
-            if i.seasons != nil {
-                return i.seasons!.count
-            } else {
-                return 0
-            }
-        } else if let i = item as? Season {
-            if i.chapters != nil {
-                return i.chapters!.count
-            } else {
-                return 0
-            }
-        } else if ((item as? Chapter) != nil) {
-            return 0
+        switch item {
+            case let i as Serial: return i.seasons != nil ? i.seasons!.count : 0
+            case let i as Season: return i.chapters != nil ? i.chapters!.count : 0
+            case is Chapter: return 0
+            default: return serials != nil ? serials!.count : 0
         }
-        
-        return serials?.count ?? 0
     }
     
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
-        if let i = item as? Serial {
-            return (i.seasons?[index])!
-        } else if let i = item as? Season {
-            return (i.chapters?[index])!
+        switch item {
+            case let i as Serial: return (i.seasons?[index])!
+            case let i as Season: return (i.chapters?[index])!
+            default: return (serials?[index])!
         }
-        
-        return (serials?[index])!
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
-        if let i = item as? Serial {
-            return i.seasons != nil
-        } else if let i = item as? Season {
-            return i.chapters != nil
-        } else if ((item as? Chapter) != nil) {
-            return false
+        switch item {
+            case let i as Serial: return i.seasons != nil ? i.seasons!.count > 0 : false
+            case let i as Season: return i.chapters != nil ? i.chapters!.count > 0 : false
+            case is Chapter: return false
+            default: return false
         }
-        
-        return false
     }
     
 }
@@ -112,24 +96,28 @@ extension SerialsViewController: NSOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, viewForTableColumn tableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         var view: NSTableCellView?
         
-        if let i = item as? Serial {
+        switch item {
+        case let i as Serial:
             view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Serial: " + i.data.title
                 textField.sizeToFit()
             }
-        } else if let i = item as? Season {
+            break
+        case let i as Season:
             view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Season: " + i.data.title
                 textField.sizeToFit()
             }
-        } else if let i = item as? Chapter {
+            break
+        case let i as Chapter:
             view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Chapter " + (i.data.title ?? "unknown")
                 textField.sizeToFit()
             }
+        default: ()
         }
         
         return view

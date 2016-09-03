@@ -184,6 +184,112 @@ class SerialsService {
         self.remoteDB = db
     }
     
+    func getSerials() -> Promise<[Serial]> {
+        return remoteDB.downloadJSON("/serials.json")
+            .then { serials in
+                let promises =
+                    serials.map {
+                        self.remoteDB.downloadJSON($0.path)
+                }
+                
+                return join(promises)
+                    .then { seasons -> (Entities, [Entities]) in
+                        return (serials, seasons)
+                }
+            }.then { (data: (Entities, [Entities])) in
+                let (serials, seasons) = data
+                let promises =
+                    seasons.reduce([], combine: +)
+                        .map {
+                            self.remoteDB.downloadJSON($0.path)
+                }
+                
+                return join(promises)
+                    .then { chapters -> (Entities, [Entities], [Entities]) in
+                        return (serials, seasons, chapters)
+                }
+            }.then { (data: (Entities, [Entities], [Entities])) in
+                let (serials, seasons, chapters) = data
+                let promises =
+                    chapters.reduce([], combine: +)
+                        .map {
+                            self.remoteDB.downloadData($0.path)
+                }
+                
+                return join(promises)
+                    .then { data -> (Entities, [Entities], [Entities], [NSData]) in
+                        return (serials, seasons, chapters, data)
+                }
+            }.then { (data: (Entities, [Entities], [Entities], [NSData])) -> (Entities, [Entities], [[[ChapterData]]]) in
+                let (serials, seasons, chapters, chaptersRawData) = data
+                let (_, chaptersData) =
+                    chapters.reduce((0, [])) { (acc: (Int, [[ChapterData]]), arr: [EntityJSON]) -> (Int,[[ChapterData]]) in
+                        let (index1, result) = acc
+                        return (
+                            index1 + arr.count,
+                            result + [
+                                arr.enumerate().map { (index2: Int, data: EntityJSON) -> ChapterData in
+                                    return ChapterData(
+                                        title: data.title,
+                                        raw: String(
+                                            data: chaptersRawData[acc.0 + index2],
+                                            encoding: NSUTF8StringEncoding
+                                        )
+                                    )
+                                }
+                            ]
+                        )
+                }
+                var index = 0
+                let newChaptersData =
+                    seasons.map { (season: Entities) -> [[ChapterData]] in
+                        let slice = chaptersData[index..<season.count]
+                        index = index + season.count
+                        var newArr = Array<[ChapterData]>()
+                        for el in slice {
+                            newArr.append(el)
+                        }
+                        return newArr
+                }
+                return (serials, seasons, newChaptersData)
+            }.then { (data: (Entities, [Entities], [[[ChapterData]]])) -> [Serial] in
+                let (serials, seasons, chapters) = data
+                return self.parseSerials(serials, seasons, chapters)
+        }
+    }
+    
+    func saveSerials(serials: [Serial]) -> Promise<Void> {
+        typealias Seasons = [Season];
+        typealias Chapters = [Chapter];
+        return uploadSerials(serials)
+            .then { (serials: [Serial]) -> Promise<[Seasons]> in
+                let promises =
+                    serials.map { serial in
+                        return self.uploadSeasons(
+                            serial.seasons!,
+                            prefix: "/" + serial.data.title
+                        )
+                }
+                
+                return join(promises)
+            }
+            .then { (seasons: [Seasons]) -> Seasons in
+                return seasons.reduce([], combine: +)
+            }.then { (seasons: Seasons) -> Promise<[Chapters]> in
+                let promises =
+                    seasons.map { season in
+                        return self.uploadChapters(
+                            season.chapters!,
+                            prefix: "/" + season.serial!.data.title + "/" + season.data.title
+                        )
+                }
+                
+                return join(promises)
+            }.then { _ -> Void in
+                
+        }
+    }
+    
     func parseSerials(serials: ListNode<EntityJSON>?, _ seasons: ListNode<Entities>?, _ chapters: ListNode<[[ChapterData]]>?, _ result: NSMutableArray = NSMutableArray()) -> [Serial] {
         guard let serial = serials,
             let season = seasons,

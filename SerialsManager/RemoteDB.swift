@@ -16,6 +16,7 @@ struct EntityJSON {
 }
 
 typealias Entities = [EntityJSON]
+typealias JSON = [String: AnyObject]
 
 enum RemoteDBError: ErrorType, CustomStringConvertible {
     case DownloadError(description: String)

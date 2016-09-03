@@ -65,6 +65,7 @@
 		8421FFD61D7ACB7200DC2CA3 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				843072301D2BB19E00C08568 /* Serials.swift */,
 				8421FFD71D7ACC4000DC2CA3 /* RemoteDB.swift */,
 				8421FFD91D7ACEB900DC2CA3 /* DropboxDB.swift */,
 			);
@@ -101,7 +102,6 @@
 				8430721F1D2A6F4300C08568 /* SerialsViewController.swift */,
 				843072211D2A6F4300C08568 /* Assets.xcassets */,
 				843072261D2A6F4300C08568 /* Info.plist */,
-				843072301D2BB19E00C08568 /* Serials.swift */,
 				84E1828C1D524403003A6FB6 /* ChapterDetailsViewController.swift */,
 				84619DD31D72F72D00B7BCCA /* LoadingSheetViewController.swift */,
 			);

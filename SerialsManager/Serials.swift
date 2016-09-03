@@ -148,3 +148,121 @@ func updateChapterData(chapter: Chapter, text: String?) -> Void {
     )
     chapter.data = newData
 }
+
+class ListNode<T> {
+    var value: T
+    var next: ListNode? = nil
+    
+    init(_ value: T) {
+        self.value = value
+    }
+    
+    static func arrayToList(arr: [T]) -> ListNode<T> {
+        var root: ListNode<T>? = nil
+        var prev: ListNode<T>? = nil
+        for el in arr {
+            guard root != nil else {
+                root = ListNode(el)
+                prev = root!
+                continue
+            }
+            let newNode = ListNode(el)
+            prev!.next = newNode
+            prev = newNode
+        }
+        return root!
+    }
+}
+
+class SerialsService {
+    static func parseSerials(serials: ListNode<EntityJSON>?, _ seasons: ListNode<Entities>?, _ chapters: ListNode<[[ChapterData]]>?, _ result: NSMutableArray = NSMutableArray()) -> [Serial] {
+        guard let serial = serials,
+            let season = seasons,
+            let chapter = chapters else {
+                return result.flatMap {
+                    $0 as? Serial
+                }
+        }
+        let newSerial =
+            Serial(
+                data: SerialData(
+                    title: serial.value.title
+                ))
+        newSerial.seasons = parseSeasons(
+            season.value,
+            chapter.value,
+            newSerial)
+        result.addObject(
+            newSerial
+        )
+        return parseSerials(
+            serial.next,
+            season.next,
+            chapter.next,
+            result)
+    }
+    
+    static func parseSerials(serials: Entities, _ seasons: [Entities], _ chapters: [[[ChapterData]]]) -> [Serial] {
+        return parseSerials(
+            ListNode.arrayToList(serials),
+            ListNode.arrayToList(seasons),
+            ListNode.arrayToList(chapters)
+        )
+    }
+    
+    static func parseSeasons(seasons: ListNode<EntityJSON>?, _ chapters: ListNode<[ChapterData]>?, _ serial: Serial, _ result: NSMutableArray = NSMutableArray()) -> [Season] {
+        guard let season = seasons,
+            let chapter = chapters else {
+                return result.flatMap {
+                    $0 as? Season
+                }
+        }
+        let newSeason =
+            Season(
+                data: SeasonData(
+                    title: season.value.title
+                ),
+                serial: serial
+        )
+        newSeason.chapters = parseChapters(
+            chapter.value,
+            newSeason
+        )
+        result.addObject(newSeason)
+        return parseSeasons(
+            season.next,
+            chapter.next,
+            serial,
+            result
+        )
+    }
+    
+    static func parseSeasons(seasons: Entities, _ chapters: [[ChapterData]], _ serial: Serial) -> [Season] {
+        return parseSeasons(
+            ListNode.arrayToList(seasons),
+            ListNode.arrayToList(chapters),
+            serial)
+    }
+    
+    static func parseChapters(chapters: ListNode<ChapterData>?, _ season: Season, _ result: NSMutableArray = NSMutableArray()) -> [Chapter] {
+        guard let chapter = chapters else {
+            return result.flatMap {
+                $0 as? Chapter
+            }
+        }
+        let newChapter =
+            Chapter(data: chapter.value, season: season)
+        result.addObject(newChapter)
+        return parseChapters(
+            chapter.next,
+            season,
+            result
+        )
+    }
+    
+    static func parseChapters(chapters: [ChapterData], _ season: Season) -> [Chapter] {
+        return parseChapters(
+            ListNode.arrayToList(chapters),
+            season)
+    }
+}

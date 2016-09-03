@@ -11,7 +11,7 @@ import PromiseKit
 import SwiftyDropbox
 
 class DropboxDB : RemoteDB {
-    static func downloadJSON(path: String) -> Promise<Entities> {
+    func downloadJSON(path: String) -> Promise<Entities> {
         return Promise { resolve, reject in
             guard let client = Dropbox.authorizedClient else {
                 reject(RemoteDBError.Unauthorized)
@@ -53,7 +53,7 @@ class DropboxDB : RemoteDB {
         }
     }
     
-    static func downloadData(path: String) -> Promise<NSData> {
+    func downloadData(path: String) -> Promise<NSData> {
         return Promise { resolve, reject in
             guard let client = Dropbox.authorizedClient else {
                 reject(RemoteDBError.Unauthorized)
@@ -82,7 +82,7 @@ class DropboxDB : RemoteDB {
         }
     }
     
-    static func createFolder(path: String) -> Promise<Files.FolderMetadata> {
+    func createFolder(path: String) -> Promise<Files.FolderMetadata> {
         return Promise { resolve, reject in
             guard let client = Dropbox.authorizedClient else {
                 reject(RemoteDBError.Unauthorized)
@@ -100,7 +100,7 @@ class DropboxDB : RemoteDB {
         }
     }
     
-    static func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata> {
+    func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata> {
         return Promise { resolve, reject in
             guard let client = Dropbox.authorizedClient else {
                 reject(RemoteDBError.Unauthorized)

@@ -36,8 +36,8 @@ enum RemoteDBError: ErrorType, CustomStringConvertible {
 }
 
 protocol RemoteDB {
-    static func downloadJSON(path: String) -> Promise<Entities>
-    static func downloadData(path: String) -> Promise<NSData>
-    static func createFolder(path: String) -> Promise<Files.FolderMetadata>
-    static func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata>
+    func downloadJSON(path: String) -> Promise<Entities>
+    func downloadData(path: String) -> Promise<NSData>
+    func createFolder(path: String) -> Promise<Files.FolderMetadata>
+    func uploadFile(path: String, body: NSData) -> Promise<Files.FileMetadata>
 }

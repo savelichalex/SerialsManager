@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import PromiseKit
+import SwiftyDropbox
 
 struct SerialData {
     let title: String
@@ -175,7 +177,14 @@ class ListNode<T> {
 }
 
 class SerialsService {
-    static func parseSerials(serials: ListNode<EntityJSON>?, _ seasons: ListNode<Entities>?, _ chapters: ListNode<[[ChapterData]]>?, _ result: NSMutableArray = NSMutableArray()) -> [Serial] {
+    
+    let remoteDB: RemoteDB
+    
+    init(db: RemoteDB) {
+        self.remoteDB = db
+    }
+    
+    func parseSerials(serials: ListNode<EntityJSON>?, _ seasons: ListNode<Entities>?, _ chapters: ListNode<[[ChapterData]]>?, _ result: NSMutableArray = NSMutableArray()) -> [Serial] {
         guard let serial = serials,
             let season = seasons,
             let chapter = chapters else {
@@ -202,7 +211,7 @@ class SerialsService {
             result)
     }
     
-    static func parseSerials(serials: Entities, _ seasons: [Entities], _ chapters: [[[ChapterData]]]) -> [Serial] {
+    func parseSerials(serials: Entities, _ seasons: [Entities], _ chapters: [[[ChapterData]]]) -> [Serial] {
         return parseSerials(
             ListNode.arrayToList(serials),
             ListNode.arrayToList(seasons),
@@ -210,7 +219,7 @@ class SerialsService {
         )
     }
     
-    static func parseSeasons(seasons: ListNode<EntityJSON>?, _ chapters: ListNode<[ChapterData]>?, _ serial: Serial, _ result: NSMutableArray = NSMutableArray()) -> [Season] {
+    func parseSeasons(seasons: ListNode<EntityJSON>?, _ chapters: ListNode<[ChapterData]>?, _ serial: Serial, _ result: NSMutableArray = NSMutableArray()) -> [Season] {
         guard let season = seasons,
             let chapter = chapters else {
                 return result.flatMap {
@@ -237,14 +246,14 @@ class SerialsService {
         )
     }
     
-    static func parseSeasons(seasons: Entities, _ chapters: [[ChapterData]], _ serial: Serial) -> [Season] {
+    func parseSeasons(seasons: Entities, _ chapters: [[ChapterData]], _ serial: Serial) -> [Season] {
         return parseSeasons(
             ListNode.arrayToList(seasons),
             ListNode.arrayToList(chapters),
             serial)
     }
     
-    static func parseChapters(chapters: ListNode<ChapterData>?, _ season: Season, _ result: NSMutableArray = NSMutableArray()) -> [Chapter] {
+    func parseChapters(chapters: ListNode<ChapterData>?, _ season: Season, _ result: NSMutableArray = NSMutableArray()) -> [Chapter] {
         guard let chapter = chapters else {
             return result.flatMap {
                 $0 as? Chapter
@@ -260,9 +269,144 @@ class SerialsService {
         )
     }
     
-    static func parseChapters(chapters: [ChapterData], _ season: Season) -> [Chapter] {
+    func parseChapters(chapters: [ChapterData], _ season: Season) -> [Chapter] {
         return parseChapters(
             ListNode.arrayToList(chapters),
             season)
+    }
+    
+    func uploadSerials(serials: [Serial]) -> Promise<[Serial]> {
+        let serialsWithSeasons =
+            serials.filter {
+                $0.seasons != nil
+        }
+        guard serialsWithSeasons.count != 0  else {
+            return Promise(serials)
+        }
+        return firstly { () -> Promise<[Files.FolderMetadata]> in
+            // create folders first because I don't want to write JSON file
+            // if an error happen
+            let promises: [Promise<Files.FolderMetadata>] =
+                serialsWithSeasons.map { (serial: Serial) -> Promise<Files.FolderMetadata> in
+                    return self.remoteDB.createFolder("/" + serial.data.title)
+            }
+            return join(promises)
+            }.then { (_: [Files.FolderMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let serialsJSON = try SerialsService.toJSON(serials) { serial in
+                            let serialDict = NSMutableDictionary()
+                            serialDict.setValue(serial.data.title, forKey: "title")
+                            serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "path")
+                            return serialDict
+                        }
+                        resolve(serialsJSON)
+                    } catch let error {
+                        reject(error)
+                    }
+                }
+            }.then { (serialsJSON: String) -> Promise<Files.FileMetadata> in
+                return self.remoteDB.uploadFile(
+                    "/serials.json",
+                    body: serialsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { (_: Files.FileMetadata) -> [Serial] in
+                return serialsWithSeasons
+        }
+    }
+    
+    func uploadSeasons(seasons: [Season], prefix: String) -> Promise<[Season]> {
+        let seasonsWithChapters =
+            seasons.filter { $0.chapters != nil }
+        guard seasonsWithChapters.count != 0 else {
+            return Promise(seasons)
+        }
+        return firstly { () -> Promise<[Files.FolderMetadata]> in
+            // create folders first because I don't want to write JSON file
+            // if an error happen
+            let promises: [Promise<Files.FolderMetadata>] =
+                seasonsWithChapters.map { (season: Season) -> Promise<Files.FolderMetadata> in
+                    let folder = prefix + "/" + season.data.title
+                    return self.remoteDB.createFolder(folder)
+            }
+            return join(promises)
+            }.then { (_: [Files.FolderMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let seasonsJSON = try SerialsService.toJSON(seasons) { season in
+                            let seasonDict = NSMutableDictionary()
+                            seasonDict.setValue(season.data.title, forKey: "title")
+                            seasonDict.setValue(prefix + "/" + season.data.title + "/chapters.json", forKey:    "path")
+                            return seasonDict
+                        }
+                        resolve(seasonsJSON)
+                    } catch let error {
+                        reject(error)
+                    }
+                }
+            }.then { (seasonsJSON: String) -> Promise<Files.FileMetadata> in
+                return self.remoteDB.uploadFile(
+                    prefix + "/seasons.json",
+                    body: seasonsJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { _ in
+                return seasonsWithChapters
+        }
+    }
+    
+    func uploadChapters(chapters: [Chapter], prefix: String) -> Promise<[Chapter]> {
+        guard chapters.count != 0 else {
+            return Promise(chapters)
+        }
+        return firstly { () -> Promise<[Files.FileMetadata]> in
+            // uplaod files first because I don't want to write JSON file
+            // if an error happen
+            let promises =
+                chapters.map { chapter in
+                    return self.remoteDB.uploadFile(
+                        prefix + "/" + chapter.data.title! + ".srt",
+                        body: chapter.data.raw!.dataUsingEncoding(NSUTF8StringEncoding)!
+                    )
+            }
+            return join(promises)
+            }.then { (_: [Files.FileMetadata]) throws -> Promise<String> in
+                return Promise { resolve, reject in
+                    do {
+                        let chaptersJSON = try SerialsService.toJSON(chapters) { chapter in
+                            let chapterDict = NSMutableDictionary()
+                            chapterDict.setValue(chapter.data.title, forKey: "title")
+                            let chapterSrtPath = prefix + "/" + chapter.data.title! + ".srt"
+                            chapterDict.setValue(chapterSrtPath, forKey: "path")
+                            return chapterDict
+                        }
+                        resolve(chaptersJSON)
+                    } catch let error {
+                        reject(error)
+                    }
+                }
+            }.then { (chaptersJSON: String) -> Promise<Files.FileMetadata> in
+                return self.remoteDB.uploadFile(
+                    prefix + "/chapters.json",
+                    body: chaptersJSON.dataUsingEncoding(NSUTF8StringEncoding)!
+                )
+            }.then { _ in
+                return chapters
+        }
+    }
+    
+    static func toJSON<T>(items: [T], _ itemToDict: (T) -> NSMutableDictionary) throws -> String {
+        let toDicts: [NSMutableDictionary] = items.map(itemToDict)
+        let isValid = NSJSONSerialization.isValidJSONObject(toDicts)
+        if !isValid {
+            throw RemoteDBError.NotValid
+        }
+        var jsonString: String;
+        do {
+            let serialJSON = try NSJSONSerialization.dataWithJSONObject(toDicts, options: NSJSONWritingOptions())
+            jsonString = NSString(data: serialJSON, encoding: NSUTF8StringEncoding) as! String
+        } catch {
+            throw RemoteDBError.Unknown
+        }
+        return jsonString;
     }
 }

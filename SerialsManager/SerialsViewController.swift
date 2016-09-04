@@ -35,16 +35,26 @@ class SerialsViewController: NSViewController {
     
     @IBAction func addNewEntity(sender: NSButton) {
         let selectedRow = outlineView.selectedRow
-        if selectedRow == -1 {
-            return
-        }
-        if let item = outlineView.itemAtRow(selectedRow) as? Season {
+        switch outlineView.itemAtRow(selectedRow) {
+        case let item as Season:
             let newChapter = addNewChapter(item)
             outlineView.reloadData()
             setChapterInChapterController(newChapter)
-            let newRowIndex = selectedRow + item.chapters!.count
+            let newRowIndex = selectedRow + (item.chapters != nil ? item.chapters!.count : 0)
             outlineView.expandItem(item)
             outlineView.selectRowIndexes(NSIndexSet(index: newRowIndex), byExtendingSelection: true)
+            break
+        case let item as Serial:
+            addNewSeason(item)
+            outlineView.reloadData()
+            let newRowIndex = selectedRow + (item.seasons != nil ? item.seasons!.count : 0)
+            outlineView.expandItem(item)
+            outlineView.selectRowIndexes(NSIndexSet(index: newRowIndex), byExtendingSelection: true)
+            break
+        case is Chapter: break
+        default:
+            addNewSerial(&serials!)
+            outlineView.reloadData()
         }
     }
     

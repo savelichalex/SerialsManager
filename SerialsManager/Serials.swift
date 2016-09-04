@@ -29,7 +29,7 @@ class Serial {
     
     init(data: SerialData) {
         self.data = data
-        seasons = nil
+        seasons = []
     }
 }
 
@@ -41,7 +41,7 @@ class Season {
     init(data: SeasonData, serial: Serial) {
         self.data = data
         self.serial = serial
-        chapters = nil
+        chapters = []
     }
 }
 
@@ -141,6 +141,25 @@ func addNewChapter(season: Season) -> Chapter {
         )
     season.chapters?.append(newChapter)
     return newChapter
+}
+
+func addNewSeason(serial: Serial) -> Season {
+    let newSeason =
+        Season(
+            data: SeasonData(title: String((serial.seasons?.count ?? 0) + 1)),
+            serial: serial
+    )
+    serial.seasons?.append(newSeason)
+    return newSeason
+}
+
+func addNewSerial(inout serials: [Serial]) -> Serial {
+    let newSerial =
+        Serial(
+            data: SerialData(title: "new serial")
+        );
+    serials.append(newSerial)
+    return newSerial
 }
 
 func updateChapterData(chapter: Chapter, text: String?) -> Void {

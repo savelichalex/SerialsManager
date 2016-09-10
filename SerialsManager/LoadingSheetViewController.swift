@@ -46,6 +46,13 @@ class LoadingSheetViewController: NSViewController {
         return self
     }
     
+    func prepareForForkedBuildWarning(vc: NSViewController) -> LoadingSheetViewController {
+        return prepareForError(vc, description: "Hey, looks like you want to" +
+            " manually build SerialsManager." +
+            " Please contact with me (email: savelichalex93@gmail.com)" +
+            " to get detailed description how do this.")
+    }
+    
     func prepareForError(description: String) -> LoadingSheetViewController {
         sheetTitle?.stringValue = errorText
         sheetDescription?.stringValue = description

@@ -30,6 +30,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Insert code here to initialize your application
         guard let appKey = SecretConfig.DropboxAppKey,
             let accessToken = SecretConfig.DropboxOAuthAccessToken else {
+                if let sVC = serialsVC {
+                    sVC.presentViewControllerAsSheet(loadingSheet)
+                    loadingSheet.prepareForForkedBuildWarning(sVC)
+                }
                 return
         }
         if let sVC = serialsVC {

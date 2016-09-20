@@ -40,9 +40,9 @@ class ChapterDetailsViewController: NSViewController {
                 return
             }
 
-            dispatch_async(dispatch_get_main_queue()) { [unowned self] in
-                self.chapterRawTextView?.textStorage?.mutableString.setString(strData)
-                self.loadURL?.stringValue = ""
+            dispatch_async(dispatch_get_main_queue()) { [weak self] in
+                self?.chapterRawTextView?.textStorage?.mutableString.setString(strData)
+                self?.loadURL?.stringValue = ""
             }
         }
         task.resume()

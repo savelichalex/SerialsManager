@@ -9,15 +9,18 @@
 import Cocoa
 
 class SerialsViewController: NSViewController {
-    
+
+    @IBOutlet weak var outlineView: NSOutlineView!
+
+
     var serials: [Serial]? {
-        didSet{
+        didSet {
             outlineView.reloadData()
         }
     }
-    
-    @IBOutlet weak var outlineView: NSOutlineView!
-    
+
+    // MARK: - Actions
+
     @IBAction func clickOnCell(sender: NSOutlineView) {
         let item = sender.itemAtRow(sender.clickedRow)
         if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
@@ -32,7 +35,7 @@ class SerialsViewController: NSViewController {
             setChapterInChapterController(i)
         }
     }
-    
+
     @IBAction func addNewEntity(sender: NSButton) {
         let selectedRow = outlineView.selectedRow
         switch outlineView.itemAtRow(selectedRow) {
@@ -40,14 +43,14 @@ class SerialsViewController: NSViewController {
             let newChapter = addNewChapter(item)
             outlineView.reloadData()
             setChapterInChapterController(newChapter)
-            let newRowIndex = selectedRow + (item.chapters != nil ? item.chapters!.count : 0)
+            let newRowIndex = selectedRow + (item.chapters?.count ?? 0)
             outlineView.expandItem(item)
             outlineView.selectRowIndexes(NSIndexSet(index: newRowIndex), byExtendingSelection: true)
             break
         case let item as Serial:
             addNewSeason(item)
             outlineView.reloadData()
-            let newRowIndex = selectedRow + (item.seasons != nil ? item.seasons!.count : 0)
+            let newRowIndex = selectedRow + (item.seasons?.count ?? 0)
             outlineView.expandItem(item)
             outlineView.selectRowIndexes(NSIndexSet(index: newRowIndex), byExtendingSelection: true)
             break
@@ -57,7 +60,9 @@ class SerialsViewController: NSViewController {
             outlineView.reloadData()
         }
     }
-    
+
+    // MARK: - Some stuff
+
     func setChapterInChapterController(chapter: Chapter) -> Bool {
         if let chapterController = self.parentViewController?.childViewControllers[1] as? ChapterDetailsViewController {
             chapterController.chapter = chapter
@@ -66,23 +71,29 @@ class SerialsViewController: NSViewController {
             return false
         }
     }
-    
+
     func getCurrentSerials() -> [Serial]? {
         return serials
     }
+
 }
 
+//MARK: - NSOutlineViewDataSource
 extension SerialsViewController: NSOutlineViewDataSource {
-    
+
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
-            case let i as Serial: return i.seasons != nil ? i.seasons!.count : 0
-            case let i as Season: return i.chapters != nil ? i.chapters!.count : 0
-            case is Chapter: return 0
-            default: return serials != nil ? serials!.count : 0
+            case let i as Serial:
+                return i.seasons?.count ?? 0
+            case let i as Season:
+                return i.chapters?.count ?? 0
+            case is Chapter:
+                return 0
+            default:
+                return serials?.count ?? 0
         }
     }
-    
+
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
             case let i as Serial: return (i.seasons?[index])!
@@ -90,46 +101,51 @@ extension SerialsViewController: NSOutlineViewDataSource {
             default: return (serials?[index])!
         }
     }
-    
+
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         switch item {
-            case let i as Serial: return i.seasons != nil ? i.seasons!.count > 0 : false
-            case let i as Season: return i.chapters != nil ? i.chapters!.count > 0 : false
-            case is Chapter: return false
-            default: return false
+            case let i as Serial:
+                return i.seasons?.count > 0
+            case let i as Season:
+                return i.chapters?.count > 0
+            case is Chapter:
+                return false
+            default:
+                return false
         }
     }
-    
+
 }
 
+// MARK: - NSOutlineViewDelegate
 extension SerialsViewController: NSOutlineViewDelegate {
+
     func outlineView(outlineView: NSOutlineView, viewForTableColumn tableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
-        var view: NSTableCellView?
-        
         switch item {
         case let i as Serial:
-            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            let view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Serial: " + i.data.title
                 textField.sizeToFit()
             }
-            break
+            return view
         case let i as Season:
-            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            let view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Season: " + i.data.title
                 textField.sizeToFit()
             }
-            break
+            return view
         case let i as Chapter:
-            view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
+            let view = outlineView.makeViewWithIdentifier("SerialItemCell", owner: self) as? NSTableCellView
             if let textField = view?.textField {
                 textField.stringValue = "Chapter " + (i.data.title ?? "unknown")
                 textField.sizeToFit()
             }
-        default: ()
+            return view
+        default:
+            return nil
         }
-        
-        return view
     }
+
 }

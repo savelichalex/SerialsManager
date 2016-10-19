@@ -14,6 +14,7 @@ private let chaptersExt = "srt"
 
 struct SerialData {
     let title: String
+    let cover: String
 }
 
 struct SeasonData {
@@ -81,7 +82,11 @@ func getSerials(serialsPath: NSURL) -> [Serial]? {
     }
 
     return dirs.map {
-        let serial = Serial(data: SerialData(title: $0.lastPathComponent!))
+        let serial = Serial(
+                        data: SerialData(
+                            title: $0.lastPathComponent!,
+                            cover: ""
+                        ))
         serial.seasons = getSeasons($0, serial: serial)
         return serial
     }
@@ -135,7 +140,7 @@ func addNewSeason(serial: Serial) -> Season {
 func addNewSerial(inout serials: [Serial]) -> Serial {
     let newSerial =
         Serial(
-            data: SerialData(title: "new serial")
+            data: SerialData(title: "new serial", cover: "")
         )
     serials.append(newSerial)
     return newSerial

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SwiftyDropbox
 import PromiseKit
 
 class SerialsService {
@@ -134,7 +135,8 @@ class SerialsService {
         let newSerial =
             Serial(
                 data: SerialData(
-                    title: serial.value.title
+                    title: serial.value.title,
+                    cover: "https://www.dropbox.com/s/a873fi5yrer551d/cover.png?raw=1"
                 ))
         newSerial.seasons = parseSeasons(
             season.value,
@@ -237,6 +239,7 @@ class SerialsService {
                             let serialDict = NSMutableDictionary()
                             serialDict.setValue(serial.data.title, forKey: "title")
                             serialDict.setValue("/" + serial.data.title + "/seasons.json", forKey: "path")
+                            serialDict.setValue(serial.data.cover, forKey: "cover")
                             return serialDict
                         }
                         resolve(serialsJSON)

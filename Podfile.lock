@@ -1,5 +1,5 @@
 PODS:
-  - Alamofire (3.4.1)
+  - Alamofire (3.5.0)
   - OMGHTTPURLRQ (3.2.0):
     - OMGHTTPURLRQ/RQ (= 3.2.0)
   - OMGHTTPURLRQ/FormURLEncode (3.2.0)
@@ -23,25 +23,32 @@ PODS:
     - Alamofire (~> 3.1)
 
 DEPENDENCIES:
+  - Alamofire (from `https://github.com/Alamofire/Alamofire.git`, tag `3.5.0`)
   - PromiseKit (~> 3.4)
   - SwiftyDropbox (from `https://github.com/Krivoblotsky/SwiftyDropbox`, branch `develop`)
 
 EXTERNAL SOURCES:
+  Alamofire:
+    :git: https://github.com/Alamofire/Alamofire.git
+    :tag: 3.5.0
   SwiftyDropbox:
     :branch: develop
     :git: https://github.com/Krivoblotsky/SwiftyDropbox
 
 CHECKOUT OPTIONS:
+  Alamofire:
+    :git: https://github.com/Alamofire/Alamofire.git
+    :tag: 3.5.0
   SwiftyDropbox:
     :commit: 7d7b33b112162d0045bb91a8a07e5f1d2984ca3c
     :git: https://github.com/Krivoblotsky/SwiftyDropbox
 
 SPEC CHECKSUMS:
-  Alamofire: 01a82e2f6c0f860ade35534c8dd88be61bdef40c
+  Alamofire: b70a7352335f8ea5babd0a923eb7e8eacc67b877
   OMGHTTPURLRQ: 1e54807cb7d5dbb506926e53498e1e9ac5720c79
   PromiseKit: 3a8a529c0571f8c2c423dba0897ff39bc060bf92
   SwiftyDropbox: b119b792924d9aca58336cb0abf2d03e27a4067b
 
-PODFILE CHECKSUM: c4045df5b53c317e4b37310849bcb1e654fe6cb0
+PODFILE CHECKSUM: e7559f3157a7396dff1862930513cd1f9f61940e
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.0

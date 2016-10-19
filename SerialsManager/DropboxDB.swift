@@ -23,7 +23,7 @@ class DropboxDB : RemoteDB {
                 // generate a unique name for this file in case we've seen it before
                 let UUID = NSUUID().UUIDString
                 let pathComponent = "\(UUID)-\(response.suggestedFilename!)"
-                return directoryURL.URLByAppendingPathComponent(pathComponent)
+                return directoryURL.URLByAppendingPathComponent(pathComponent)!
             }
             client.files.download(path: path, destination: destination)
                 .response { response, error in
@@ -65,7 +65,7 @@ class DropboxDB : RemoteDB {
                 // generate a unique name for this file in case we've seen it before
                 let UUID = NSUUID().UUIDString
                 let pathComponent = "\(UUID)-\(response.suggestedFilename!)"
-                return directoryURL.URLByAppendingPathComponent(pathComponent)
+                return directoryURL.URLByAppendingPathComponent(pathComponent)!
             }
             client.files.download(path: path, destination: destination)
                 .response { response, error in

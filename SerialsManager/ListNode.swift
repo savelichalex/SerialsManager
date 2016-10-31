@@ -22,7 +22,7 @@ class ListNode<T> {
         for el in arr {
             guard root != nil else {
                 root = ListNode(el)
-                prev = nil
+                prev = root
                 continue
             }
             let newNode = ListNode(el)
